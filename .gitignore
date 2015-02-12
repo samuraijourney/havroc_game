@@ -19,6 +19,16 @@
 /*.booproj
 /*.svd
 
+# ====================== #
+# Visual C++ cache files #
+# ====================== #
+ipch/
+*.aps
+*.ncb
+*.opensdf
+*.sdf
+*.cachefile
+
 # ======================================= #
 # Unity3D Generated File On Crash Reports #
 # ======================================= #
