@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class ThreadBase 
+public class Thread
 {
     private bool m_isDone = false;
     private object m_handle = new object();
