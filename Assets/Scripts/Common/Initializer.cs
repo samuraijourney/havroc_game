@@ -3,39 +3,43 @@ using System.Collections;
 
 public class Initializer : MonoBehaviour 
 {
+	public bool useDLL = true;
 	public bool startConnection = true;
 	public bool startTracking = true;
 
 	public void Awake () 
     {
-		if(startConnection)
+		if(useDLL)
 		{
-			HVR_Network.RegisterConnectCallback(this.OnConnect);
-			HVR_Network.RegisterDisconnectCallback(this.OnDisconnect);
-			
-			// Initialize network connection
-			if (!HVR_Network.IsActive()) 
+			if(startConnection)
 			{
-				Debug.Log("Starting connection");
+				HVR_Network.RegisterConnectCallback(this.OnConnect);
+				HVR_Network.RegisterDisconnectCallback(this.OnDisconnect);
 				
-				(new Thread()).Start(() => HVR_Network.StartConnection("127.0.0.1"));
+				// Initialize network connection
+				if (!HVR_Network.IsActive()) 
+				{
+					Debug.Log("Starting connection");
+					
+					(new Thread()).Start(() => HVR_Network.StartConnection("127.0.0.1"));
+				}
+				else
+				{
+					// Initialize tracking service
+					if (startTracking && !HVR_Tracking.IsActive()) 
+					{
+						HVR_Tracking.StartTrackingService();
+					}
+					else if(!startTracking && HVR_Tracking.IsActive())
+					{
+						HVR_Tracking.EndTrackingService();
+					}
+				}
 			}
 			else
 			{
-				// Initialize tracking service
-				if (startTracking && !HVR_Tracking.IsActive()) 
-				{
-					HVR_Tracking.StartTrackingService();
-				}
-				else if(!startTracking && HVR_Tracking.IsActive())
-				{
-					HVR_Tracking.EndTrackingService();
-				}
+				Cleanup();
 			}
-		}
-		else
-		{
-			Cleanup();
 		}
 	}
 
@@ -53,16 +57,19 @@ public class Initializer : MonoBehaviour
 
 	private void Cleanup()
 	{
-		if(HVR_Tracking.IsActive())
+		if(useDLL)
 		{
-			HVR_Tracking.EndTrackingService();
-		}
-		
-		if (HVR_Network.IsActive())
-		{
-			Debug.Log("Ending connection");
+			if(HVR_Tracking.IsActive())
+			{
+				HVR_Tracking.EndTrackingService();
+			}
 			
-			(new Thread()).Start(() => HVR_Network.EndConnection());
+			if (HVR_Network.IsActive())
+			{
+				Debug.Log("Ending connection");
+				
+				(new Thread()).Start(() => HVR_Network.EndConnection());
+			}
 		}
 	}
 

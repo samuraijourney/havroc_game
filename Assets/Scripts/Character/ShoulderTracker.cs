@@ -18,7 +18,7 @@ public class ShoulderTracker : MonoBehaviour
 	// Use this for initialization
 	public void Start () 
 	{
-		m_callback = new HVR_Tracking.ShoulderCallback (OnShoulderEvent);
+		m_callback = new HVR_Tracking.ShoulderCallback(OnShoulderEvent);
 
 		HVR_Tracking.RegisterShoulderCallback(m_callback);
 
