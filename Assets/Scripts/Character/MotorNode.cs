@@ -29,19 +29,21 @@ public class MotorNode : MonoBehaviour
 	{
 		if (motorIndex != 0) 
 		{
-			if (col.gameObject.CompareTag("Bullet")) 
-			{
-				Vector3 vel = col.relativeVelocity;
-				
-				Debug.Log ("Motor hit - Index:" + motorIndex + " Speed:(" + vel.x + "," + vel.y + "," + vel.z + ")");
-				
-				m_original_color = gameObject.renderer.material.color;
-				gameObject.renderer.material.color = Color.red;
-				
-				m_hit_end_time = Time.time + m_hit_delay;
+			//if (col.gameObject.CompareTag("Bullet") || col.gameObject.CompareTag("Player")) 
+			//{
+			Vector3 vel = col.relativeVelocity;
+			
+			Debug.Log ("Motor hit - Index:" + motorIndex + " Speed:(" + vel.x + "," + vel.y + "," + vel.z + ")");
+			
+			m_original_color = gameObject.renderer.material.color;
+			gameObject.renderer.material.color = Color.red;
+			
+			m_hit_end_time = Time.time + m_hit_delay;
+
+			if (col.gameObject.CompareTag("Bullet"))
+		    {
+				Destroy (col.gameObject);
 			}
 		}
-
-		Destroy (col.gameObject);
 	}
 }
