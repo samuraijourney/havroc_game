@@ -3,18 +3,18 @@ using System.Collections;
 
 public class HeadTracker : MonoBehaviour {
 
-	private GameObject _ovrController;
+	private GameObject m_ovrController;
 
 	// Use this for initialization
 	void Start () 
 	{
-		_ovrController = GameObject.FindGameObjectWithTag ("MainCamera");
+		m_ovrController = GameObject.FindGameObjectWithTag ("MainCamera");
 	}
 	
 	// Update is called once per frame
 	void Update () 
 	{
-		transform.rotation = _ovrController.transform.rotation;
+		transform.rotation = m_ovrController.transform.rotation;
 		transform.Rotate (new Vector3 (0, -90, -90));
 	}
 }

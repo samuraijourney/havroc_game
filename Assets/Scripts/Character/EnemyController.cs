@@ -7,25 +7,29 @@ public class EnemyController : MonoBehaviour
 {
 	[System.NonSerialized]
 	public Transform enemy;								// a transform to Lerp the camera to during head look
-	
+
 	public float animSpeed = 1.5f;						// a public setting for overall animator animation speed
 
 	private Animator anim;								// a reference to the animator on the character
 	private AnimatorStateInfo currentBaseState;			// a reference to the current state of the animator, used for base layer
-	
-	static int idleState = Animator.StringToHash("Base Layer.Idle");	
-	static int hitByJabState = Animator.StringToHash("Base Layer.Hit By Jab");			// these integers are references to our animator's states
-	static int leftJabState = Animator.StringToHash("Base Layer.Left Jab");				// and are used to check state for various actions to occur
-	static int rightCrossState = Animator.StringToHash("Base Layer.Right Cross");		// within our FixedUpdate() function below
-	static int blockState = Animator.StringToHash("Base Layer.Block");
-	static int knockoutState = Animator.StringToHash("Base Layer.Knockout");
-	static int knockoutCountdownState = Animator.StringToHash("Base Layer.Knockout Countdown");
-	static int winState = Animator.StringToHash("Base Layer.Win");
+	private GameObject healthBar;
+	private HavrocController havrocController;
+
+	int idleState = Animator.StringToHash("Base Layer.Idle");	
+	int hitByJabState = Animator.StringToHash("Base Layer.Hit By Jab");			// these integers are references to our animator's states
+	int leftJabState = Animator.StringToHash("Base Layer.Left Jab");				// and are used to check state for various actions to occur
+	int rightCrossState = Animator.StringToHash("Base Layer.Right Cross");		// within our FixedUpdate() function below
+	int blockState = Animator.StringToHash("Base Layer.Block");
+	int knockoutState = Animator.StringToHash("Base Layer.Knockout");
+	int knockoutCountdownState = Animator.StringToHash("Base Layer.Knockout Countdown");
+	int winState = Animator.StringToHash("Base Layer.Win");
 
 	void Start ()
 	{
 		anim = GetComponent<Animator>();			
 		enemy = GameObject.Find("Havroc Player").transform;	
+		healthBar = GameObject.Find ("Health Bar Enemy");
+		havrocController = GameObject.Find ("Havroc Player").GetComponent<HavrocController> ();
 	}
 
 	void FixedUpdate ()
@@ -71,10 +75,30 @@ public class EnemyController : MonoBehaviour
 		{
 			anim.SetBool("Lose", false);
 		}
+
+
+		transform.LookAt (enemy.position);
+	}
+
+	public bool IsAttacking
+	{
+		get
+		{
+			return 	(currentBaseState.nameHash == rightCrossState) ||
+					(currentBaseState.nameHash == leftJabState);
+		}
 	}
 
 	void OnCollisionEnter(Collision col)
 	{
+		if (havrocController.IsAttacking)
+		{
+			healthBar.SendMessage("ApplyDamage", ComputeDamage(col.relativeVelocity));
+		}
+	}
 
+	float ComputeDamage(Vector3 velocity)
+	{
+		return 1.0f;
 	}
 }
