@@ -4,27 +4,58 @@ using System.Collections;
 public class HavrocController : MonoBehaviour {
 
 	public float damageModifier = 20.0f;
+	public float animSpeed = 1.0f;
 
+	private bool lose = false;
+	private bool win = false;
+	
 	private EnemyController m_enemyController;
 
 	private bool m_isAttacking = false;
 
 	private bool m_pass = true;
 	private int m_damageCount = 0;
-
-	private bool m_dead = false;
-	private float m_deadTimer = 0f;
-	private float m_deadStartAngle = 0f;
-	private float m_fallSpeed = 1.4f;
+	
+	private Animator m_anim;
+	private AnimatorStateInfo m_currentBaseState;	
 
 	private GameObject m_healthBar;
 	private Transform m_enemy;
+
+	int m_idleState = Animator.StringToHash("Base Layer.Idle");	
+	int m_loseState = Animator.StringToHash("Base Layer.Lose");
+	int m_winState = Animator.StringToHash("Base Layer.Win");
 	
 	void Start () 
 	{
+		m_anim = GetComponent<Animator>();
 		m_enemyController = GameObject.Find ("Enemy Player").GetComponent<EnemyController> ();
 		m_healthBar = GameObject.Find ("Health Bar Havroc");
 		m_enemy = GameObject.Find("Enemy Player").transform;	
+	}
+
+	void FixedUpdate()
+	{
+		m_anim.speed = animSpeed;
+		m_currentBaseState = m_anim.GetCurrentAnimatorStateInfo(0);
+		
+		AnimateLose(lose);
+		AnimateWin(win);
+	}
+
+	private void AnimateLose(bool on)
+	{
+		Animate ("Lose", on);
+	}
+	
+	private void AnimateWin(bool on)
+	{
+		Animate ("Win", on);
+	}
+	
+	private void Animate(string state, bool on)
+	{
+		m_anim.SetBool (state, on);
 	}
 
 	void Update () 
@@ -35,17 +66,9 @@ public class HavrocController : MonoBehaviour {
 			m_damageCount++;
 		}
 
-		if(!m_dead)
+		if(!lose && !win)
 		{
 			transform.LookAt (new Vector3(m_enemy.position.x,transform.position.y,m_enemy.position.z));
-			m_deadStartAngle = transform.eulerAngles.x;
-		}
-		else
-		{
-			m_deadTimer += Time.deltaTime*m_fallSpeed;
-			float x = Mathf.PI*m_deadTimer;
-			float inc = Mathf.Lerp(m_deadStartAngle,12.0f*Mathf.Sin(x)/x - 90.0f,m_deadTimer);
-			transform.eulerAngles = new Vector3(inc,transform.eulerAngles.y,transform.eulerAngles.z);
 		}
 	}
 
@@ -96,8 +119,13 @@ public class HavrocController : MonoBehaviour {
 		return velProj.magnitude * damageModifier;
 	}
 
-	void Dead()
+	void Lose()
 	{
-		m_dead = true;
+		lose = true;
+	}
+
+	void Win()
+	{
+		win = true;
 	}
 }

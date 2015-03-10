@@ -8,6 +8,9 @@ public class EnemyController : MonoBehaviour
 	public float animSpeed = 1.0f;						// a public setting for overall animator animation speed
 	public float damageModifier = 20.0f;
 
+	private bool lose = false;
+	private bool win = false;
+
 	private Animator anim;								// a reference to the animator on the character
 	private AnimatorStateInfo currentBaseState;			// a reference to the current state of the animator, used for base layer
 	private AnimatorStateInfo nextBaseState;
@@ -40,11 +43,22 @@ public class EnemyController : MonoBehaviour
 		currentBaseState = anim.GetCurrentAnimatorStateInfo(0);	// set our currentState variable to the current state of the Base Layer (0) of animation
 		nextBaseState = anim.GetNextAnimatorStateInfo (0);
 
-		AnimateBlock(Input.GetButton("Block"));
+		if(!win && !lose)
+		{
+			AnimateBlock(Input.GetButton("Block"));
+		}
 
 		if (currentBaseState.nameHash == idleState)
 		{
-			if(Input.GetButtonDown("Right Punch") && nextBaseState.nameHash != rightCrossState)
+			if(win && nextBaseState.nameHash != winState)
+			{
+				AnimateWin(true);
+			}
+			else if(lose && nextBaseState.nameHash != knockoutState)
+			{
+				AnimateLose(true);
+			}
+			else if(Input.GetButtonDown("Right Punch") && nextBaseState.nameHash != rightCrossState)
 			{
 				AnimateRightPunch(true);
 			}
@@ -79,7 +93,7 @@ public class EnemyController : MonoBehaviour
 			AnimateKnockdown(false);
 		}
 
-		else if (currentBaseState.nameHash == winState)
+		/*else if (currentBaseState.nameHash == winState)
 		{
 			AnimateWin(false);
 		}
@@ -87,7 +101,7 @@ public class EnemyController : MonoBehaviour
 		else if (currentBaseState.nameHash == knockoutState)
 		{
 			AnimateLose(false);
-		}
+		}*/
 
 		transform.LookAt (enemy.position);
 	}
@@ -167,5 +181,15 @@ public class EnemyController : MonoBehaviour
 		Vector3 velProj = Vector3.Project (velocity, transform.forward);
 		
 		return velProj.magnitude * damageModifier;
+	}
+
+	void Lose()
+	{
+		lose = true;
+	}
+
+	void Win()
+	{
+		win = true;
 	}
 }
