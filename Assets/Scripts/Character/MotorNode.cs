@@ -36,6 +36,11 @@ public class MotorNode : MonoBehaviour
 
 	void OnCollisionEnter(Collision col)
 	{
+		if (col.gameObject.CompareTag("Node"))
+		{
+			return;
+		}
+
 		if (motorIndex != 0) 
 		{
 			gameObject.renderer.material.color = Color.red;

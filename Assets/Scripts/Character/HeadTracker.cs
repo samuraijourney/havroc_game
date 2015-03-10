@@ -17,7 +17,7 @@ public class HeadTracker : MonoBehaviour {
 	void Update () 
 	{
 		transform.rotation = m_ovrController.transform.rotation;
-		transform.Rotate (new Vector3 (0, -90, -90));
+		transform.Rotate (new Vector3 (0, 90, -90));
 
 		if(Mathf.Abs(transform.localEulerAngles.x) > 90.0f)
 		{
