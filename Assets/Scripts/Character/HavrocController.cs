@@ -3,32 +3,34 @@ using System.Collections;
 
 public class HavrocController : MonoBehaviour {
 
+	public float damageModifier = 20.0f;
+
 	private EnemyController m_enemyController;
 
 	private bool m_isAttacking = false;
 
-	private bool m_isBeingAttacked = false;
-	private bool m_wasBeingAttacked = false;
-
 	private bool m_pass = true;
+	private int m_damageCount = 0;
 
 	private GameObject m_healthBar;
+	private Transform m_enemy;
 	
 	void Start () 
 	{
 		m_enemyController = GameObject.Find ("Enemy Player").GetComponent<EnemyController> ();
 		m_healthBar = GameObject.Find ("Health Bar Havroc");
+		m_enemy = GameObject.Find("Enemy Player").transform;	
 	}
 
 	void Update () 
 	{
-		m_wasBeingAttacked = m_isBeingAttacked;
-		m_isBeingAttacked = m_enemyController.IsAttacking;
-
-		if(!m_wasBeingAttacked && m_isBeingAttacked)
+		if(m_damageCount < m_enemyController.AttackCount)
 		{
 			m_pass = true;
+			m_damageCount++;
 		}
+
+		transform.LookAt (m_enemy.position);
 	}
 
 	public bool IsAttacking
@@ -60,10 +62,15 @@ public class HavrocController : MonoBehaviour {
 		}
 
 		m_isAttacking = IsArmMotorNode(data.motorIndex);
+
+		Vector3 vel = data.collision.relativeVelocity;
+		Debug.Log ("Motor hit - Index:" + data.motorIndex + " Speed:(" + vel.x + "," + vel.y + "," + vel.z + ")");
 	}
 
 	float ComputeDamage(Vector3 velocity)
 	{
-		return 1.0f;
+		Vector3 velProj = Vector3.Project (velocity, transform.forward);
+
+		return velProj.magnitude * damageModifier;
 	}
 }

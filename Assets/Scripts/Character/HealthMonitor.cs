@@ -39,7 +39,7 @@ public class HealthMonitor : MonoBehaviour
 		m_scalarTransform.localScale = new Vector3 (scale, m_scalarTransform.localScale.y, m_scalarTransform.localScale.z);
 		m_healthBarTransform.renderer.material.color = new Color (r,g,b);
 		
-		if (health == 0) 
+		if (health < 1.0f) 
 		{
 			m_deadXTransform.renderer.material.color = Color.red;
 		} 

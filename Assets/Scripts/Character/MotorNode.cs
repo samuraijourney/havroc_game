@@ -38,10 +38,6 @@ public class MotorNode : MonoBehaviour
 	{
 		if (motorIndex != 0) 
 		{
-			Vector3 vel = col.relativeVelocity;
-			
-			Debug.Log ("Motor hit - Index:" + motorIndex + " Speed:(" + vel.x + "," + vel.y + "," + vel.z + ")");
-
 			gameObject.renderer.material.color = Color.red;
 			
 			m_hit_end_time = Time.time + m_hit_delay;

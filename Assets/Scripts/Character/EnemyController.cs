@@ -5,15 +5,17 @@ using System.Collections;
 [RequireComponent(typeof (Animator))]
 public class EnemyController : MonoBehaviour
 {
-	[System.NonSerialized]
-	public Transform enemy;								// a transform to Lerp the camera to during head look
-
-	public float animSpeed = 1.5f;						// a public setting for overall animator animation speed
+	public float animSpeed = 1.0f;						// a public setting for overall animator animation speed
+	public float damageModifier = 20.0f;
 
 	private Animator anim;								// a reference to the animator on the character
 	private AnimatorStateInfo currentBaseState;			// a reference to the current state of the animator, used for base layer
+	private AnimatorStateInfo nextBaseState;
 	private GameObject healthBar;
 	private HavrocController havrocController;
+	private Transform enemy;								// a transform to Lerp the camera to during head look
+
+	private int attackCount = 0;
 
 	int idleState = Animator.StringToHash("Base Layer.Idle");	
 	int hitByJabState = Animator.StringToHash("Base Layer.Hit By Jab");			// these integers are references to our animator's states
@@ -36,48 +38,111 @@ public class EnemyController : MonoBehaviour
 	{
 		anim.speed = animSpeed;									// set the speed of our animator to the public variable 'animSpeed'
 		currentBaseState = anim.GetCurrentAnimatorStateInfo(0);	// set our currentState variable to the current state of the Base Layer (0) of animation
+		nextBaseState = anim.GetNextAnimatorStateInfo (0);
 
-		anim.SetBool("Block", Input.GetButtonDown("Block"));
+		AnimateBlock(Input.GetButton("Block"));
 
 		if (currentBaseState.nameHash == idleState)
 		{
-			if(Input.GetButtonDown("Right Punch"))
+			if(Input.GetButtonDown("Right Punch") && nextBaseState.nameHash != rightCrossState)
 			{
-				anim.SetBool("RightPunch", true);
+				AnimateRightPunch(true);
 			}
-			else if(Input.GetButtonDown("Left Punch"))
+			else if(Input.GetButtonDown("Left Punch") && nextBaseState.nameHash != leftJabState)
 			{
-				anim.SetBool("LeftPunch", false);
+				AnimateLeftPunch(true);
 			}
 		}
 
 		else if (currentBaseState.nameHash == rightCrossState)
 		{
-			anim.SetBool("RightPunch", false);
+			AnimateRightPunch(false);
+
+			if(Input.GetButtonDown("Left Punch") && nextBaseState.nameHash != leftJabState)
+			{
+				AnimateLeftPunch(true);
+			}
 		}
 
 		else if (currentBaseState.nameHash == leftJabState)
 		{
-			anim.SetBool("LeftPunch", false);
-		}
+			AnimateLeftPunch(false);
 
-		else if (currentBaseState.nameHash == winState)
-		{
-			anim.SetBool("Win", false);
+			if(Input.GetButtonDown("Right Punch") && nextBaseState.nameHash != rightCrossState)
+			{
+				AnimateRightPunch(true);
+			}
 		}
 
 		else if (currentBaseState.nameHash == knockoutCountdownState)
 		{
-			anim.SetBool("Knockdown", false);
+			AnimateKnockdown(false);
 		}
 
+		else if (currentBaseState.nameHash == winState)
+		{
+			AnimateWin(false);
+		}
+		
 		else if (currentBaseState.nameHash == knockoutState)
 		{
-			anim.SetBool("Lose", false);
+			AnimateLose(false);
 		}
 
-
 		transform.LookAt (enemy.position);
+	}
+
+	private void AnimateBlock(bool on)
+	{
+		Animate ("Block", on);
+	}
+
+	private void AnimateRightPunch(bool on)
+	{
+		if(on)
+		{
+			attackCount++;
+		}
+
+		Animate ("RightPunch", on);
+	}
+
+	private void AnimateLeftPunch(bool on)
+	{
+		if(on)
+		{
+			attackCount++;
+		}
+
+		Animate ("LeftPunch", on);
+	}
+
+	private void AnimateKnockdown(bool on)
+	{
+		Animate ("Knockdown", on);
+	}
+
+	private void AnimateWin(bool on)
+	{
+		Animate ("Win", on);
+	}
+
+	private void AnimateLose(bool on)
+	{
+		Animate ("Lose", on);
+	}
+
+	private void Animate(string state, bool on)
+	{
+		anim.SetBool (state, on);
+	}
+
+	public int AttackCount
+	{
+		get
+		{
+			return attackCount;
+		}
 	}
 
 	public bool IsAttacking
@@ -99,6 +164,8 @@ public class EnemyController : MonoBehaviour
 
 	float ComputeDamage(Vector3 velocity)
 	{
-		return 1.0f;
+		Vector3 velProj = Vector3.Project (velocity, transform.forward);
+		
+		return velProj.magnitude * damageModifier;
 	}
 }
