@@ -12,6 +12,11 @@ public class HavrocController : MonoBehaviour {
 	private bool m_pass = true;
 	private int m_damageCount = 0;
 
+	private bool m_dead = false;
+	private float m_deadTimer = 0f;
+	private float m_deadStartAngle = 0f;
+	private float m_fallSpeed = 1.4f;
+
 	private GameObject m_healthBar;
 	private Transform m_enemy;
 	
@@ -30,7 +35,18 @@ public class HavrocController : MonoBehaviour {
 			m_damageCount++;
 		}
 
-		transform.LookAt (m_enemy.position);
+		if(!m_dead)
+		{
+			transform.LookAt (new Vector3(m_enemy.position.x,transform.position.y,m_enemy.position.z));
+			m_deadStartAngle = transform.eulerAngles.x;
+		}
+		else
+		{
+			m_deadTimer += Time.deltaTime*m_fallSpeed;
+			float x = Mathf.PI*m_deadTimer;
+			float inc = Mathf.Lerp(m_deadStartAngle,12.0f*Mathf.Sin(x)/x - 90.0f,m_deadTimer);
+			transform.eulerAngles = new Vector3(inc,transform.eulerAngles.y,transform.eulerAngles.z);
+		}
 	}
 
 	public bool IsAttacking
@@ -52,19 +68,25 @@ public class HavrocController : MonoBehaviour {
 		{
 			if(m_pass)
 			{
-				m_healthBar.SendMessage("ApplyDamage", ComputeDamage(data.collision.relativeVelocity));
+				float damage = ComputeDamage(data.collision.relativeVelocity);
+				m_healthBar.SendMessage("ApplyDamage", damage);
 				m_pass = false;
+
+				Debug.Log("Damage: " + damage);
 			}
 		}
 		else
 		{
-			m_healthBar.SendMessage("ApplyDamage", ComputeDamage(data.collision.relativeVelocity));
+			float damage = ComputeDamage(data.collision.relativeVelocity);
+			m_healthBar.SendMessage("ApplyDamage", damage);
+
+			Debug.Log("Damage: " + damage);
 		}
 
 		m_isAttacking = IsArmMotorNode(data.motorIndex);
 
 		Vector3 vel = data.collision.relativeVelocity;
-		Debug.Log ("Motor hit - Index:" + data.motorIndex + " Speed:(" + vel.x + "," + vel.y + "," + vel.z + ")");
+		//Debug.Log ("Motor " + data.motorIndex + " Hit");
 	}
 
 	float ComputeDamage(Vector3 velocity)
@@ -72,5 +94,10 @@ public class HavrocController : MonoBehaviour {
 		Vector3 velProj = Vector3.Project (velocity, transform.forward);
 
 		return velProj.magnitude * damageModifier;
+	}
+
+	void Dead()
+	{
+		m_dead = true;
 	}
 }

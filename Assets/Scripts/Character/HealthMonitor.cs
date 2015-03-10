@@ -5,6 +5,7 @@ public class HealthMonitor : MonoBehaviour
 {
 	public float maxHealth = 100f;
 	public float health = 100f;
+	public Transform player;
 
 	private float m_scaleMax = 1.33f;
 	private float m_scaleMin = 0.0f;
@@ -42,6 +43,8 @@ public class HealthMonitor : MonoBehaviour
 		if (health < 1.0f) 
 		{
 			m_deadXTransform.renderer.material.color = Color.red;
+
+			player.SendMessage("Dead");
 		} 
 		else 
 		{
