@@ -24,7 +24,7 @@ public class HealthMonitor : MonoBehaviour
 		m_deadXTransform = transform.Find ("Bar/Name Bar/Name/X");
 		m_healthText = transform.Find ("Health Text").GetComponent<TextMesh> ();
 
-		m_deadXTransform.renderer.material.color = Color.clear;
+		m_deadXTransform.GetComponent<Renderer>().material.color = Color.clear;
 	}
 	
 	// Update is called once per frame
@@ -39,18 +39,18 @@ public class HealthMonitor : MonoBehaviour
 		float b = 0;
 		
 		m_scalarTransform.localScale = new Vector3 (scale, m_scalarTransform.localScale.y, m_scalarTransform.localScale.z);
-		m_healthBarTransform.renderer.material.color = new Color (r,g,b);
+		m_healthBarTransform.GetComponent<Renderer>().material.color = new Color (r,g,b);
 		
 		if (health < 1.0f) 
 		{
-			m_deadXTransform.renderer.material.color = Color.red;
+			m_deadXTransform.GetComponent<Renderer>().material.color = Color.red;
 
 			player.SendMessage("Lose");
 			enemy.SendMessage("Win");
 		} 
 		else 
 		{
-			m_deadXTransform.renderer.material.color = Color.clear;
+			m_deadXTransform.GetComponent<Renderer>().material.color = Color.clear;
 		}
 	}
 

@@ -16,7 +16,7 @@ public class Shooter : MonoBehaviour
 	void Start () 
 	{
 		m_bulletSpawn = transform.Find ("Bullet Spawn Point"); // only works if bulletSpawn is a child!
-		m_camera = GameObject.Find("OVRCameraRig").camera;
+		m_camera = GameObject.Find("OVRCameraRig").GetComponent<Camera>();
 	}
 	
 	// Update is called once per frame

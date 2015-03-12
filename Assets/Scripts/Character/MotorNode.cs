@@ -21,7 +21,7 @@ public class MotorNode : MonoBehaviour
 	void Start () 
     {
 		m_havrocPlayer = GameObject.Find ("Havroc Player");
-		m_original_color = gameObject.renderer.material.color;
+		m_original_color = gameObject.GetComponent<Renderer>().material.color;
 	}
 	
 	// Update is called once per frame
@@ -29,7 +29,7 @@ public class MotorNode : MonoBehaviour
     {
 		if (Time.time > m_hit_end_time) 
 		{
-			gameObject.renderer.material.color = m_original_color;
+			gameObject.GetComponent<Renderer>().material.color = m_original_color;
 			m_hit_end_time = Mathf.Infinity;
 		}
 	}
@@ -43,7 +43,7 @@ public class MotorNode : MonoBehaviour
 
 		if (motorIndex != 0) 
 		{
-			gameObject.renderer.material.color = Color.red;
+			gameObject.GetComponent<Renderer>().material.color = Color.red;
 			
 			m_hit_end_time = Time.time + m_hit_delay;
 
