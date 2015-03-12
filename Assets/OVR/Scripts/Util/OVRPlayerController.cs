@@ -266,8 +266,8 @@ public class OVRPlayerController : MonoBehaviour
 
 		float rotateInfluence = SimulationRate * Time.deltaTime * RotationAmount * RotationScaleMultiplier;
 
-		if (!SkipMouseRotation)
-			euler.y += Input.GetAxis("Mouse X") * rotateInfluence * 3.25f;
+		//if (!SkipMouseRotation)
+		//	euler.y += Input.GetAxis("Mouse X") * rotateInfluence * 3.25f;
 
 		moveInfluence = SimulationRate * Time.deltaTime * Acceleration * 0.1f * MoveScale * MoveScaleMultiplier;
 
