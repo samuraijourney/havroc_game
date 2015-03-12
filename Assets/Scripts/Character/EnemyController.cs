@@ -6,7 +6,7 @@ using System.Collections;
 public class EnemyController : MonoBehaviour
 {
 	public float animSpeed = 1.0f;						// a public setting for overall animator animation speed
-	public float damageModifier = 20.0f;
+	public float damagePerHit = 1.0f;
 
 	private bool lose = false;
 	private bool win = false;
@@ -172,15 +172,8 @@ public class EnemyController : MonoBehaviour
 	{
 		if (havrocController.IsAttacking)
 		{
-			healthBar.SendMessage("ApplyDamage", ComputeDamage(col.relativeVelocity));
+			healthBar.SendMessage("ApplyDamage", damagePerHit);
 		}
-	}
-
-	float ComputeDamage(Vector3 velocity)
-	{
-		Vector3 velProj = Vector3.Project (velocity, transform.forward);
-		
-		return velProj.magnitude * damageModifier;
 	}
 
 	void Lose()

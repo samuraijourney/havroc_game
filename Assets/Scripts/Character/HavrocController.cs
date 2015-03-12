@@ -3,7 +3,7 @@ using System.Collections;
 
 public class HavrocController : MonoBehaviour {
 
-	public float damageModifier = 20.0f;
+	public float damagePerHit = 1.0f;
 	public float animSpeed = 1.0f;
 
 	private bool lose = false;
@@ -91,32 +91,23 @@ public class HavrocController : MonoBehaviour {
 		{
 			if(m_pass)
 			{
-				float damage = ComputeDamage(data.collision.relativeVelocity);
-				m_healthBar.SendMessage("ApplyDamage", damage);
+				m_healthBar.SendMessage("ApplyDamage", damagePerHit);
 				m_pass = false;
 
-				Debug.Log("Damage: " + damage);
+				Debug.Log("Damage: " + damagePerHit);
 			}
 		}
 		else
 		{
-			float damage = ComputeDamage(data.collision.relativeVelocity);
-			m_healthBar.SendMessage("ApplyDamage", damage);
+			m_healthBar.SendMessage("ApplyDamage", damagePerHit);
 
-			Debug.Log("Damage: " + damage);
+			Debug.Log("Damage: " + damagePerHit);
 		}
 
 		m_isAttacking = IsArmMotorNode(data.motorIndex);
 
 		Vector3 vel = data.collision.relativeVelocity;
 		//Debug.Log ("Motor " + data.motorIndex + " Hit");
-	}
-
-	float ComputeDamage(Vector3 velocity)
-	{
-		Vector3 velProj = Vector3.Project (velocity, transform.forward);
-
-		return velProj.magnitude * damageModifier;
 	}
 
 	void Lose()
