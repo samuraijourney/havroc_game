@@ -20,8 +20,7 @@ public class Initializer : MonoBehaviour
 				if (!HVR_Network.IsActive()) 
 				{
 					Debug.Log("Starting connection");
-					
-					(new Thread()).Start(() => HVR_Network.StartConnection("127.0.0.1"));
+					HVR_Network.AsyncStartConnection("127.0.0.1");
 				}
 				else
 				{
@@ -52,36 +51,27 @@ public class Initializer : MonoBehaviour
 	// Update is called once per frame
 	public void Update () 
     {
-	
+		if(startTracking && HVR_Network.IsActive() && !HVR_Tracking.IsActive())
+		{
+			HVR_Tracking.StartTrackingService();
+		}
 	}
-
+	
 	private void Cleanup()
 	{
 		if(useDLL)
 		{
-			if(HVR_Tracking.IsActive())
-			{
-				HVR_Tracking.EndTrackingService();
-			}
-			
-			if (HVR_Network.IsActive())
-			{
-				Debug.Log("Ending connection");
-				
-				(new Thread()).Start(() => HVR_Network.EndConnection());
-			}
+			Debug.Log("Ending tracking");
+			HVR_Tracking.EndTrackingService();
+
+			Debug.Log("Ending connection");
+			HVR_Network.EndConnection();
 		}
 	}
 
 	public void OnConnect()
 	{
 		Debug.Log("Connect successful");
-
-		// Initialize tracking service
-		if (startTracking && !HVR_Tracking.IsActive()) 
-		{
-			HVR_Tracking.StartTrackingService();
-		}
 	}
 	
 	public void OnDisconnect()

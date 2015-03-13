@@ -19,6 +19,10 @@ public class HVR_Network
     public static extern int StartConnection([Out, MarshalAs(UnmanagedType.LPStr)] string ip);
     public static        int StartConnection() { return StartConnection(null); }
 
+	[DllImport(dll_name, EntryPoint = "hvr_async_start_connection", CallingConvention = callingConvention)]
+	public static extern int AsyncStartConnection([Out, MarshalAs(UnmanagedType.LPStr)] string ip);
+	public static        int AsyncStartConnection() { return AsyncStartConnection(null); }
+
     [DllImport(dll_name, EntryPoint = "hvr_end_connection", CallingConvention = callingConvention)]
     public static extern int EndConnection();
 
