@@ -84,6 +84,11 @@ public class ShoulderTracker : MonoBehaviour
 			pitch = s_pitch;
 			roll  = s_roll;
 
+			if(!m_tracking_on)
+			{
+				Debug.Log("Starting shoulder offset calibration");
+			}
+
 			m_tracking_on = true;
 		}
 	}
