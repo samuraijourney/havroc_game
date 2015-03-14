@@ -3,9 +3,12 @@ using System.Collections;
 
 public class Initializer : MonoBehaviour 
 {
+	public enum ConnectTarget { Local, CC3200 };
+
 	public bool useDLL = true;
 	public bool startConnection = true;
 	public bool startTracking = true;
+	public ConnectTarget endpoint = ConnectTarget.Local;
 
 	public void Awake () 
     {
@@ -14,14 +17,21 @@ public class Initializer : MonoBehaviour
 			if(startConnection)
 			{
 				HVR_Network.RegisterConnectCallback(this.OnConnect);
-				HVR_Network.RegisterDisconnectCallback(this.OnDisconnect);
+				//HVR_Network.RegisterDisconnectCallback(this.OnDisconnect);
 				
 				// Initialize network connection
 				if (!HVR_Network.IsActive()) 
 				{
 					Debug.Log("Starting connection");
-					//HVR_Network.AsyncStartConnection("127.0.0.1");
-					HVR_Network.AsyncStartConnection();
+
+					if(endpoint == ConnectTarget.Local)
+					{
+						HVR_Network.AsyncStartConnection("127.0.0.1");
+					}
+					else if(endpoint == ConnectTarget.CC3200)
+					{
+						HVR_Network.AsyncStartConnection();
+					}
 				}
 				else
 				{
