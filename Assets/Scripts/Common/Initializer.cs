@@ -55,10 +55,6 @@ public class Initializer : MonoBehaviour
 		
 	public void Update () 
     {
-		if(startTracking && HVR_Network.IsActive() && !HVR_Tracking.IsActive())
-		{
-			HVR_Tracking.StartTrackingService();
-		}
 	}
 
 	public void OnConnect()
