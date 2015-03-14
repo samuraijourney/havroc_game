@@ -14,6 +14,7 @@ public class ElbowTracker : MonoBehaviour
 	public float roll  = 0.0f; // Rotation about x
 	
 	private HVR_Tracking.ElbowCallback m_callback;
+	private bool m_tracking_on = false;
 	
 	// Use this for initialization
 	public void Start () 
@@ -30,7 +31,14 @@ public class ElbowTracker : MonoBehaviour
 	// Update is called once per frame
 	public void Update () 
 	{
-		transform.eulerAngles = new Vector3 (roll, yaw, pitch);
+		if(!m_tracking_on)
+		{
+			transform.eulerAngles = new Vector3 (yaw, pitch, roll);
+		}
+		else
+		{
+			transform.eulerAngles = new Vector3 (roll, yaw, pitch);
+		}
 	}
 	
 	public void OnElbowEvent(float e_yaw, float e_pitch, float e_roll, byte side)
@@ -40,6 +48,8 @@ public class ElbowTracker : MonoBehaviour
 			yaw   = e_yaw;
 			pitch = e_pitch;
 			roll  = e_roll;
+			
+			m_tracking_on = true;
 		}
 	}
 }

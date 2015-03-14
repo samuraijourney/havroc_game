@@ -20,7 +20,8 @@ public class Initializer : MonoBehaviour
 				if (!HVR_Network.IsActive()) 
 				{
 					Debug.Log("Starting connection");
-					HVR_Network.AsyncStartConnection("127.0.0.1");
+					//HVR_Network.AsyncStartConnection("127.0.0.1");
+					HVR_Network.AsyncStartConnection();
 				}
 				else
 				{

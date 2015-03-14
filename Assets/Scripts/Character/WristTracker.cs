@@ -14,6 +14,7 @@ public class WristTracker : MonoBehaviour
 	public float roll  = 0.0f; // Rotation about y
 	
 	private HVR_Tracking.WristCallback m_callback;
+	private bool m_tracking_on = false;
 	
 	// Use this for initialization
 	public void Start () 
@@ -30,7 +31,14 @@ public class WristTracker : MonoBehaviour
 	// Update is called once per frame
 	public void Update () 
 	{
-		transform.eulerAngles = new Vector3 (roll, yaw, pitch);
+		if(!m_tracking_on)
+		{
+			transform.eulerAngles = new Vector3 (yaw, pitch, roll);
+		}
+		else
+		{
+			transform.eulerAngles = new Vector3 (roll, yaw, pitch);
+		}
 	}
 	
 	public void OnWristEvent(float w_yaw, float w_pitch, float w_roll, byte side)
@@ -40,6 +48,8 @@ public class WristTracker : MonoBehaviour
 			yaw   = w_yaw;
 			pitch = w_pitch;
 			roll  = w_roll;
+			
+			m_tracking_on = true;
 		}
 	}
 }
