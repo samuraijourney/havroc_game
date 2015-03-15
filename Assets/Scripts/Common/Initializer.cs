@@ -55,6 +55,21 @@ public class Initializer : MonoBehaviour
 		
 	public void Update () 
     {
+		byte[] indices = new byte[72];
+		byte[] intensities = new byte[72];
+
+		for(int i = 0; i < 72; i++)
+		{
+			indices[i] = (byte)Mathf.FloorToInt(72.0f*Random.Range(0,1));
+			intensities[i] = (byte)Mathf.FloorToInt(100.0f*Random.Range(0,1));
+		}
+
+		HVR_Network.SendMotorCommand(indices, intensities, 72);
+
+		for(int i = 0; i < indices.Length; i++)
+		{
+			//Debug.Log ("Sent motor data for index " + indices [i]);
+		}
 	}
 
 	public void OnConnect()

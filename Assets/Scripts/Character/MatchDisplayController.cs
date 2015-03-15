@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class HealthDisplayOrient : MonoBehaviour 
+public class MatchDisplayController : MonoBehaviour 
 {
 	private GameObject m_ovrCentreAnchor;
 	private float m_distance;
