@@ -13,19 +13,37 @@ public class WristTracker : MonoBehaviour
 	public float pitch = 0.0f; // Rotation about z
 	public float roll  = 0.0f; // Rotation about y
 	
+	public int xSign = 1;
+	public int ySign = 1;
+	public int zSign = 1;
+	
+	private float m_initialX = 0f;
+	private float m_initialY = 0f;
+	private float m_initialZ = 0f;
+	
+	private float m_lastYaw = 0f;
+	private float m_lastPitch = 0f;
+	private float m_lastRoll = 0f;
+	
 	private HVR_Tracking.WristCallback m_callback;
 	private bool m_tracking_on = false;
+	
+	private Vector3 m_offset;
+	
+	private int m_calibrationDuration = 100; // Num of frames to calibrate with
+	private int m_calibrationCurrent = 0;
 	
 	// Use this for initialization
 	public void Start () 
 	{
-		m_callback = new HVR_Tracking.WristCallback (OnWristEvent);
+		m_callback = new HVR_Tracking.WristCallback(OnWristEvent);
+		m_offset = new Vector3 (0, 0, 0);
 		
 		HVR_Tracking.RegisterWristCallback(m_callback);
-
-		yaw   = transform.eulerAngles.x;
-		pitch = transform.eulerAngles.y;
-		roll  = transform.eulerAngles.z;
+		
+		m_initialX = transform.eulerAngles.x;
+		m_initialY = transform.eulerAngles.y;
+		m_initialZ = transform.eulerAngles.z;
 	}
 	
 	// Update is called once per frame
@@ -33,21 +51,47 @@ public class WristTracker : MonoBehaviour
 	{
 		if(!m_tracking_on)
 		{
-			transform.eulerAngles = new Vector3 (yaw, pitch, roll);
+			transform.eulerAngles = new Vector3 (m_initialX, m_initialY, m_initialZ);
+		}
+		else if(m_calibrationCurrent < m_calibrationDuration)
+		{
+			m_offset.x += roll;
+			m_offset.y += yaw;
+			m_offset.z += pitch;
+			
+			m_calibrationCurrent++;
+			
+			if(m_calibrationCurrent == m_calibrationDuration)
+			{
+				m_offset.x /= m_calibrationDuration;
+				m_offset.y /= m_calibrationDuration;
+				m_offset.z /= m_calibrationDuration;
+				
+				Debug.Log ("Offset is complete, x:" + m_offset.x + " y:" + m_offset.y + " z:" + m_offset.z);
+			}
 		}
 		else
 		{
-			transform.eulerAngles = new Vector3 (roll, yaw, pitch);
+			float x = xSign*(roll - m_offset.x + m_initialX);
+			float y = ySign*(yaw - m_offset.y + m_initialY);
+			float z = zSign*(pitch - m_offset.z + m_initialZ);
+			
+			transform.eulerAngles = new Vector3 (x, y, z);
 		}
 	}
 	
-	public void OnWristEvent(float w_yaw, float w_pitch, float w_roll, byte side)
+	public void OnWristEvent(float s_yaw, float s_pitch, float s_roll, byte side)
 	{
 		if((side == 1 && arm == Arm.Right) || (side == 2 && arm == Arm.Left))
 		{
-			yaw   = w_yaw;
-			pitch = w_pitch;
-			roll  = w_roll;
+			yaw   = s_yaw;
+			pitch = s_pitch;
+			roll  = s_roll;
+			
+			if(!m_tracking_on)
+			{
+				Debug.Log("Starting wrist offset calibration");
+			}
 			
 			m_tracking_on = true;
 		}

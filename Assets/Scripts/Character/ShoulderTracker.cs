@@ -13,66 +13,89 @@ public class ShoulderTracker : MonoBehaviour
 	public float pitch = 0.0f; // Rotation about z
 	public float roll  = 0.0f; // Rotation about y
 
-	private float m_initialX = 0f;
-	private float m_initialY = 0f;
-	private float m_initialZ = 0f;
+	private IMUCalibrator m_calibrator;
+	private IMUInitializer m_initializer;
 
-	private float m_lastYaw = 0f;
-	private float m_lastPitch = 0f;
-	private float m_lastRoll = 0f;
+	private Vector3 m_xPoseGlobalRotation;
+	private Vector3 m_yPoseGlobalRotation;
+	private Vector3 m_zPoseGlobalRotation;
 
 	private HVR_Tracking.ShoulderCallback m_callback;
-	private bool m_tracking_on = false;
 
-	private Vector3 m_offset;
-
-	private int m_calibrationDuration = 100; // Num of frames to calibrate with
-	private int m_calibrationCurrent = 0;
+	private bool m_trackingOn = false;
+	private float m_deltaTime = 0.0f;
 
 	// Use this for initialization
 	public void Start () 
 	{
-		m_callback = new HVR_Tracking.ShoulderCallback(OnShoulderEvent);
-		m_offset = new Vector3 (0, 0, 0);
+		float xPoseLocalRotationX = 0.0f;
+		float xPoseLocalRotationY = 0.0f;
+		float xPoseLocalRotationZ = 0.0f;
+		
+		float yPoseLocalRotationX = 0.0f;
+		float yPoseLocalRotationY = 0.0f;
+		float yPoseLocalRotationZ = 0.0f;
+		
+		float zPoseLocalRotationX = 0.0f;
+		float zPoseLocalRotationY = 0.0f;
+		float zPoseLocalRotationZ = 0.0f;
 
-		HVR_Tracking.RegisterShoulderCallback(m_callback);
-
-		m_initialX = transform.eulerAngles.x;
-		m_initialY = transform.eulerAngles.y;
-		m_initialZ = transform.eulerAngles.z;
-	}
-	
-	// Update is called once per frame
-	public void Update () 
-	{
-		if(!m_tracking_on)
+		switch(arm)
 		{
-			transform.eulerAngles = new Vector3 (m_initialX, m_initialY, m_initialZ);
-		}
-		else if(m_calibrationCurrent < m_calibrationDuration)
-		{
-			m_offset.x += roll;
-			m_offset.y += yaw;
-			m_offset.z += pitch;
-
-			m_calibrationCurrent++;
-
-			if(m_calibrationCurrent == m_calibrationDuration)
+			case Arm.Right:
 			{
-				m_offset.x /= m_calibrationDuration;
-				m_offset.y /= m_calibrationDuration;
-				m_offset.z /= m_calibrationDuration;
+				xPoseLocalRotationX = -5.050629f;
+				xPoseLocalRotationY = 26.61955f;
+				xPoseLocalRotationZ = 15.66278f;
 
-				Debug.Log ("Offset is complete, x:" + m_offset.x + " y:" + m_offset.y + " z:" + m_offset.z);
+				yPoseLocalRotationX = -5.050629f;
+				yPoseLocalRotationY = 26.61955f;
+				yPoseLocalRotationZ = 102.4f;
+
+				zPoseLocalRotationX = -80.03735f;
+				zPoseLocalRotationY = -55.55f;
+				zPoseLocalRotationZ = 178.6759f;
+
+				break;
+			}
+			case Arm.Left:
+			{
+				xPoseLocalRotationX = 0.0f;
+				xPoseLocalRotationY = 0.0f;
+				xPoseLocalRotationZ = 0.0f;
+				
+				yPoseLocalRotationX = 0.0f;
+				yPoseLocalRotationY = 0.0f;
+				yPoseLocalRotationZ = 0.0f;
+				
+				zPoseLocalRotationX = 0.0f;
+				zPoseLocalRotationY = 0.0f;
+				zPoseLocalRotationZ = 0.0f;
+
+				break;
 			}
 		}
-		else
-		{
-			float x = roll - m_offset.x + m_initialX;
-			float y = yaw - m_offset.y + m_initialY;
-			float z = -1*(pitch - m_offset.z + m_initialZ);
+		
+		m_xPoseGlobalRotation = transform.TransformPoint(new Vector3(xPoseLocalRotationX, xPoseLocalRotationY, xPoseLocalRotationZ));
+		m_yPoseGlobalRotation = transform.TransformPoint(new Vector3(yPoseLocalRotationX, yPoseLocalRotationY, yPoseLocalRotationZ));
+		m_zPoseGlobalRotation = transform.TransformPoint(new Vector3(zPoseLocalRotationX, zPoseLocalRotationY, zPoseLocalRotationZ));
 
-			transform.eulerAngles = new Vector3 (x, y, z);
+		m_calibrator = new IMUCalibrator(m_xPoseGlobalRotation, m_yPoseGlobalRotation, m_zPoseGlobalRotation);
+
+		m_initializer = new IMUInitializer(ref m_calibrator, 500);
+
+		m_callback = new HVR_Tracking.ShoulderCallback(OnShoulderEvent);
+		
+		HVR_Tracking.RegisterShoulderCallback(m_callback);
+	}
+
+	public void Update () 
+	{
+		m_deltaTime = Time.deltaTime;
+
+		if(m_initializer.Complete)
+		{
+			transform.eulerAngles = m_calibrator.ComputeRotation(roll, yaw, pitch);
 		}
 	}
 
@@ -84,12 +107,17 @@ public class ShoulderTracker : MonoBehaviour
 			pitch = s_pitch;
 			roll  = s_roll;
 
-			if(!m_tracking_on)
+			if(!m_trackingOn)
 			{
 				Debug.Log("Starting shoulder offset calibration");
 			}
 
-			m_tracking_on = true;
+			m_trackingOn = true;
+
+			if(!m_initializer.Complete)
+			{
+				m_initializer.Update(m_deltaTime, s_roll, s_yaw, s_pitch);
+			}
 		}
 	}
 }

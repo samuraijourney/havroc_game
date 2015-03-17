@@ -13,6 +13,10 @@ public class ElbowTracker : MonoBehaviour
 	public float pitch = 0.0f; // Rotation about z
 	public float roll  = 0.0f; // Rotation about y
 
+	public float xAddition = 0.0f;
+	public float yAddition = 0.0f;
+	public float zAddition = 0.0f;
+
 	public int xSign = 1;
 	public int ySign = 1;
 	public int zSign = 1;
@@ -72,9 +76,9 @@ public class ElbowTracker : MonoBehaviour
 		}
 		else
 		{
-			float x = xSign*(roll - m_offset.x + m_initialX);
-			float y = ySign*(yaw - m_offset.y + m_initialY);
-			float z = zSign*(pitch - m_offset.z + m_initialZ);
+			float x = xSign*(roll - m_offset.x + m_initialX + xAddition);
+			float y = ySign*(yaw - m_offset.y + m_initialY + yAddition);
+			float z = zSign*(pitch - m_offset.z + m_initialZ + zAddition);
 			
 			transform.eulerAngles = new Vector3 (x, y, z);
 		}
