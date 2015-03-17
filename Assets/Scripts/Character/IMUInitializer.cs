@@ -48,7 +48,7 @@ public class IMUInitializer
 				if(m_xPoseIterations == m_calibrationDuration)
 				{
 					m_timerCountdown = m_timerCountdownStart;
-					Debug.Log ("Please orient yourself along the Y axis");
+					Debug.Log ("Please orient yourself along the Y axis, you have " + m_timerCountdownStart + " seconds");
 				}
 			}
 			else if(m_yPoseIterations < m_calibrationDuration)
@@ -59,7 +59,7 @@ public class IMUInitializer
 				if(m_yPoseIterations == m_calibrationDuration)
 				{
 					m_timerCountdown = m_timerCountdownStart;
-					Debug.Log ("Please orient yourself along the Z axis");
+					Debug.Log ("Please orient yourself along the Z axis, you have " + m_timerCountdownStart + " seconds");
 				}
 			}
 			else if(m_zPoseIterations < m_calibrationDuration)
@@ -72,10 +72,20 @@ public class IMUInitializer
 					m_complete = true;
 				}
 			}
+
+			Debug.Log ("XIterations: " + m_xPoseIterations + " YIterations: " + m_yPoseIterations + " ZIterations: " + m_zPoseIterations);
 		}
 		else
 		{
 			m_timerCountdown -= deltaTime;
+		}
+	}
+
+	public bool Waiting
+	{
+		get
+		{
+			return m_timerCountdown > 0.1f;
 		}
 	}
 

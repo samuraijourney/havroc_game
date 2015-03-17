@@ -13,90 +13,85 @@ public class ShoulderTracker : MonoBehaviour
 	public float pitch = 0.0f; // Rotation about z
 	public float roll  = 0.0f; // Rotation about y
 
+	public Vector3 xPoseGlobalRotation;
+	public Vector3 yPoseGlobalRotation;
+	public Vector3 zPoseGlobalRotation;
+
+	public Vector3 xPosePlayerRotation;
+	public Vector3 yPosePlayerRotation;
+	public Vector3 zPosePlayerRotation;
+
+	public Vector3 posePlayerScales;
+
 	private IMUCalibrator m_calibrator;
 	private IMUInitializer m_initializer;
-
-	private Vector3 m_xPoseGlobalRotation;
-	private Vector3 m_yPoseGlobalRotation;
-	private Vector3 m_zPoseGlobalRotation;
 
 	private HVR_Tracking.ShoulderCallback m_callback;
 
 	private bool m_trackingOn = false;
 	private float m_deltaTime = 0.0f;
 
+	private int m_calibrationDuration = 100;
+
 	// Use this for initialization
 	public void Start () 
-	{
-		float xPoseLocalRotationX = 0.0f;
-		float xPoseLocalRotationY = 0.0f;
-		float xPoseLocalRotationZ = 0.0f;
-		
-		float yPoseLocalRotationX = 0.0f;
-		float yPoseLocalRotationY = 0.0f;
-		float yPoseLocalRotationZ = 0.0f;
-		
-		float zPoseLocalRotationX = 0.0f;
-		float zPoseLocalRotationY = 0.0f;
-		float zPoseLocalRotationZ = 0.0f;
+	{	
+		m_calibrator = new IMUCalibrator(xPoseGlobalRotation, yPoseGlobalRotation, zPoseGlobalRotation);
 
-		switch(arm)
-		{
-			case Arm.Right:
-			{
-				xPoseLocalRotationX = -5.050629f;
-				xPoseLocalRotationY = 26.61955f;
-				xPoseLocalRotationZ = 15.66278f;
-
-				yPoseLocalRotationX = -5.050629f;
-				yPoseLocalRotationY = 26.61955f;
-				yPoseLocalRotationZ = 102.4f;
-
-				zPoseLocalRotationX = -80.03735f;
-				zPoseLocalRotationY = -55.55f;
-				zPoseLocalRotationZ = 178.6759f;
-
-				break;
-			}
-			case Arm.Left:
-			{
-				xPoseLocalRotationX = 0.0f;
-				xPoseLocalRotationY = 0.0f;
-				xPoseLocalRotationZ = 0.0f;
-				
-				yPoseLocalRotationX = 0.0f;
-				yPoseLocalRotationY = 0.0f;
-				yPoseLocalRotationZ = 0.0f;
-				
-				zPoseLocalRotationX = 0.0f;
-				zPoseLocalRotationY = 0.0f;
-				zPoseLocalRotationZ = 0.0f;
-
-				break;
-			}
-		}
-		
-		m_xPoseGlobalRotation = transform.TransformPoint(new Vector3(xPoseLocalRotationX, xPoseLocalRotationY, xPoseLocalRotationZ));
-		m_yPoseGlobalRotation = transform.TransformPoint(new Vector3(yPoseLocalRotationX, yPoseLocalRotationY, yPoseLocalRotationZ));
-		m_zPoseGlobalRotation = transform.TransformPoint(new Vector3(zPoseLocalRotationX, zPoseLocalRotationY, zPoseLocalRotationZ));
-
-		m_calibrator = new IMUCalibrator(m_xPoseGlobalRotation, m_yPoseGlobalRotation, m_zPoseGlobalRotation);
-
-		m_initializer = new IMUInitializer(ref m_calibrator, 500);
+		m_initializer = new IMUInitializer(ref m_calibrator, m_calibrationDuration);
 
 		m_callback = new HVR_Tracking.ShoulderCallback(OnShoulderEvent);
-		
 		HVR_Tracking.RegisterShoulderCallback(m_callback);
 	}
 
+	private static int iterations = 0;
 	public void Update () 
 	{
 		m_deltaTime = Time.deltaTime;
+
+		xPosePlayerRotation = m_calibrator.PlayerXPose;
+		yPosePlayerRotation = m_calibrator.PlayerYPose;
+		zPosePlayerRotation = m_calibrator.PlayerZPose;
+
+		posePlayerScales = m_calibrator.PlayerPoseScales;
 
 		if(m_initializer.Complete)
 		{
 			transform.eulerAngles = m_calibrator.ComputeRotation(roll, yaw, pitch);
 		}
+		/*else
+		{
+			if(iterations == 0)
+			{
+				Debug.Log ("Mock calibration started");
+			}
+
+			if(iterations < m_calibrationDuration)
+			{
+				m_initializer.Update(m_deltaTime, 0, 0, 180/10);
+				transform.eulerAngles = xPoseGlobalRotation;
+			}
+			else if(iterations < 2*m_calibrationDuration)
+			{
+				m_initializer.Update(m_deltaTime, 0, 0, -90/10);
+				transform.eulerAngles = yPoseGlobalRotation;
+			}
+			else if(iterations < 3*m_calibrationDuration)
+			{
+				m_initializer.Update(m_deltaTime, 90/10, 90/10, -90/10);
+				transform.eulerAngles = zPoseGlobalRotation;
+			}
+
+			if(!m_initializer.Waiting)
+			{
+				iterations++;
+			}
+
+			if(iterations == 3*m_calibrationDuration)
+			{
+				Debug.Log ("Mock calibration done");
+			}
+		}*/
 	}
 
 	public void OnShoulderEvent(float s_yaw, float s_pitch, float s_roll, byte side)

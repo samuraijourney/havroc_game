@@ -3,7 +3,8 @@ using UnityEngine;
 public class IMUCalibrator
 {
 	public enum Pose { X, Y, Z };
-	
+
+	private Vector3 m_poseScales;
 	private Vector3 m_poseIterations;
 	
 	private Vector3 m_xPoseCharacterRotation;
@@ -33,7 +34,8 @@ public class IMUCalibrator
 		m_xPosePlayerRotationAvg = new Vector3(0,0,0);
 		m_yPosePlayerRotationAvg = new Vector3(0,0,0);
 		m_zPosePlayerRotationAvg = new Vector3(0,0,0);
-		
+
+		m_poseScales = new Vector3(0,0,0);
 		m_poseIterations = new Vector3(0,0,0);
 	}
 	
@@ -84,49 +86,15 @@ public class IMUCalibrator
 				break;
 			}
 		}
+
+		m_poseScales.x = (m_xPoseCharacterRotation.x - m_zPoseCharacterRotation.x) / (m_xPosePlayerRotationAvg.x - m_zPosePlayerRotationAvg.x);
+		m_poseScales.y = (m_yPoseCharacterRotation.y - m_zPoseCharacterRotation.y) / (m_yPosePlayerRotationAvg.y - m_zPosePlayerRotationAvg.y);
+		m_poseScales.z = (m_xPoseCharacterRotation.z - m_yPoseCharacterRotation.z) / (m_xPosePlayerRotationAvg.z - m_yPosePlayerRotationAvg.z);
 	}
-	
+
 	public Vector3 ComputeRotation(float xRotation, float yRotation, float zRotation)
 	{
-		float xPoseDiffX = Mathf.Abs(m_xPosePlayerRotationAvg.x - xRotation);
-		float xPoseDiffY = Mathf.Abs(m_xPosePlayerRotationAvg.y - yRotation);
-		float xPoseDiffZ = Mathf.Abs(m_xPosePlayerRotationAvg.z - zRotation);
-		float yPoseDiffX = Mathf.Abs(m_yPosePlayerRotationAvg.x - xRotation);
-		float yPoseDiffY = Mathf.Abs(m_yPosePlayerRotationAvg.y - yRotation);
-		float yPoseDiffZ = Mathf.Abs(m_yPosePlayerRotationAvg.z - zRotation);
-		float zPoseDiffX = Mathf.Abs(m_zPosePlayerRotationAvg.x - xRotation);
-		float zPoseDiffY = Mathf.Abs(m_zPosePlayerRotationAvg.y - yRotation);
-		float zPoseDiffZ = Mathf.Abs(m_zPosePlayerRotationAvg.z - zRotation);
-		
-		float xDiffTotal = xPoseDiffX + yPoseDiffX + zPoseDiffX;
-		float yDiffTotal = xPoseDiffY + yPoseDiffY + zPoseDiffY;
-		float zDiffTotal = xPoseDiffZ + yPoseDiffZ + zPoseDiffZ;
-
-		float xPoseWeightX = (xDiffTotal - xPoseDiffX) / xDiffTotal;
-		float xPoseWeightY = (xDiffTotal - xPoseDiffY) / xDiffTotal;
-		float xPoseWeightZ = (xDiffTotal - xPoseDiffZ) / xDiffTotal;
-		float yPoseWeightX = (yDiffTotal - yPoseDiffX) / yDiffTotal;
-		float yPoseWeightY = (yDiffTotal - yPoseDiffY) / yDiffTotal;
-		float yPoseWeightZ = (yDiffTotal - yPoseDiffZ) / yDiffTotal;
-		float zPoseWeightX = (zDiffTotal - zPoseDiffX) / zDiffTotal;
-		float zPoseWeightY = (zDiffTotal - zPoseDiffY) / zDiffTotal;
-		float zPoseWeightZ = (zDiffTotal - zPoseDiffZ) / zDiffTotal;
-
-		
-		float weightedX = (m_xPoseCharacterRotation.x * xPoseWeightX +
-						   m_yPoseCharacterRotation.x * yPoseWeightX +
-						   m_zPoseCharacterRotation.x * zPoseWeightX) /
-						  (xPoseWeightX + yPoseWeightX + zPoseWeightX);
-		float weightedY = (m_xPoseCharacterRotation.y * xPoseWeightY +
-		                   m_yPoseCharacterRotation.y * yPoseWeightY +
-		                   m_zPoseCharacterRotation.y * zPoseWeightY) /
-						  (xPoseWeightY + yPoseWeightY + zPoseWeightY);
-		float weightedZ = (m_xPoseCharacterRotation.z * xPoseWeightZ +
-		                   m_yPoseCharacterRotation.z * yPoseWeightZ +
-		                   m_zPoseCharacterRotation.z * zPoseWeightZ) /
-						  (xPoseWeightZ + yPoseWeightZ + zPoseWeightZ);
-		
-		return new Vector3(weightedX, weightedY, weightedZ);
+		return new Vector3(xRotation * m_poseScales.x, yRotation * m_poseScales.y, zRotation * m_poseScales.z);
 	}
 
 	public void Reset()
@@ -140,6 +108,38 @@ public class IMUCalibrator
 		m_zPosePlayerRotationAvg = new Vector3(0,0,0);
 		
 		m_poseIterations = new Vector3(0,0,0);
+	}
+
+	public Vector3 PlayerPoseScales
+	{
+		get
+		{
+			return m_poseScales;
+		}
+	}
+
+	public Vector3 PlayerXPose
+	{
+		get
+		{
+			return m_xPosePlayerRotationAvg;
+		}
+	}
+
+	public Vector3 PlayerYPose
+	{
+		get
+		{
+			return m_yPosePlayerRotationAvg;
+		}
+	}
+
+	public Vector3 PlayerZPose
+	{
+		get
+		{
+			return m_zPosePlayerRotationAvg;
+		}
 	}
 
 	public int GetIterationsOfPose(Pose pose)
