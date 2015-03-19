@@ -12,75 +12,79 @@ public class ElbowTracker : MonoBehaviour
 	public float yaw   = 0.0f; // Rotation about x
 	public float pitch = 0.0f; // Rotation about z
 	public float roll  = 0.0f; // Rotation about y
-
-	public float xAddition = 0.0f;
-	public float yAddition = 0.0f;
-	public float zAddition = 0.0f;
-
-	public int xSign = 1;
-	public int ySign = 1;
-	public int zSign = 1;
 	
-	private float m_initialX = 0f;
-	private float m_initialY = 0f;
-	private float m_initialZ = 0f;
+	public Vector3 xPoseGlobalRotation;
+	public Vector3 yPoseGlobalRotation;
+	public Vector3 zPoseGlobalRotation;
 	
-	private float m_lastYaw = 0f;
-	private float m_lastPitch = 0f;
-	private float m_lastRoll = 0f;
+	public Vector3 xPosePlayerRotation;
+	public Vector3 yPosePlayerRotation;
+	public Vector3 zPosePlayerRotation;
+	
+	public Vector3 posePlayerScales;
+	
+	private IMUCalibrator m_calibrator;
+	private IMUInitializer m_initializer;
 	
 	private HVR_Tracking.ElbowCallback m_callback;
-	private bool m_tracking_on = false;
 	
-	private Vector3 m_offset;
+	private bool m_trackingOn = false;
+	private float m_deltaTime = 0.0f;
 	
-	private int m_calibrationDuration = 100; // Num of frames to calibrate with
-	private int m_calibrationCurrent = 0;
+	private int m_calibrationDuration = 100;
 	
 	// Use this for initialization
 	public void Start () 
-	{
+	{	
+		m_calibrator = new IMUCalibrator(xPoseGlobalRotation, yPoseGlobalRotation, zPoseGlobalRotation);
+		
+		m_initializer = new IMUInitializer(ref m_calibrator, m_calibrationDuration);
+		
 		m_callback = new HVR_Tracking.ElbowCallback(OnElbowEvent);
-		m_offset = new Vector3 (0, 0, 0);
-		
 		HVR_Tracking.RegisterElbowCallback(m_callback);
-		
-		m_initialX = transform.eulerAngles.x;
-		m_initialY = transform.eulerAngles.y;
-		m_initialZ = transform.eulerAngles.z;
 	}
 	
-	// Update is called once per frame
 	public void Update () 
 	{
-		if(!m_tracking_on)
+		m_deltaTime = Time.deltaTime;
+		
+		xPosePlayerRotation = m_calibrator.PlayerXPose;
+		yPosePlayerRotation = m_calibrator.PlayerYPose;
+		zPosePlayerRotation = m_calibrator.PlayerZPose;
+		
+		posePlayerScales = m_calibrator.PlayerPoseScales;
+		
+		if(m_initializer.Complete)
 		{
-			transform.eulerAngles = new Vector3 (m_initialX, m_initialY, m_initialZ);
-		}
-		else if(m_calibrationCurrent < m_calibrationDuration)
-		{
-			m_offset.x += roll;
-			m_offset.y += yaw;
-			m_offset.z += pitch;
-			
-			m_calibrationCurrent++;
-			
-			if(m_calibrationCurrent == m_calibrationDuration)
-			{
-				m_offset.x /= m_calibrationDuration;
-				m_offset.y /= m_calibrationDuration;
-				m_offset.z /= m_calibrationDuration;
-				
-				Debug.Log ("Offset is complete, x:" + m_offset.x + " y:" + m_offset.y + " z:" + m_offset.z);
-			}
+			transform.eulerAngles = m_calibrator.ComputeRotation(roll, yaw, pitch);
 		}
 		else
 		{
-			float x = xSign*(roll - m_offset.x + m_initialX + xAddition);
-			float y = ySign*(yaw - m_offset.y + m_initialY + yAddition);
-			float z = zSign*(pitch - m_offset.z + m_initialZ + zAddition);
-			
-			transform.eulerAngles = new Vector3 (x, y, z);
+			switch(m_initializer.CurrentPose)
+			{
+			case IMUCalibrator.Pose.X:
+			{
+				m_initializer.Update(m_deltaTime, 0, 0, 180/10);
+				transform.eulerAngles = xPoseGlobalRotation;
+				break;
+			}
+			case IMUCalibrator.Pose.Y:
+			{
+				m_initializer.Update(m_deltaTime, 0, 0, -90/10);
+				transform.eulerAngles = yPoseGlobalRotation;
+				break;
+			}
+			case IMUCalibrator.Pose.Z:
+			{
+				m_initializer.Update(m_deltaTime, 90/10, 90/10, -90/10);
+				transform.eulerAngles = zPoseGlobalRotation;
+				break;
+			}
+			default:
+			{
+				break;
+			}
+			}
 		}
 	}
 	
@@ -92,12 +96,17 @@ public class ElbowTracker : MonoBehaviour
 			pitch = s_pitch;
 			roll  = s_roll;
 			
-			if(!m_tracking_on)
+			if(!m_trackingOn)
 			{
 				Debug.Log("Starting elbow offset calibration");
 			}
 			
-			m_tracking_on = true;
+			m_trackingOn = true;
+			
+			if(!m_initializer.Complete)
+			{
+				m_initializer.Update(m_deltaTime, s_roll, s_yaw, s_pitch);
+			}
 		}
 	}
 }

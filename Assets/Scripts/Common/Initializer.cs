@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
-using System.Collections;
+using System;
+using System.Runtime.InteropServices;
 
 public class Initializer : MonoBehaviour 
 {
@@ -11,10 +12,15 @@ public class Initializer : MonoBehaviour
 	public ConnectTarget endpoint = ConnectTarget.Local;
 	public string customIP;
 
+	private HVR_Logger.LoggerCallback m_loggerCallback;
+
 	public void Awake () 
     {
 		if(useDLL)
 		{
+			m_loggerCallback = new HVR_Logger.LoggerCallback(OnLoggerEvent);
+			HVR_Logger.SetLogger(m_loggerCallback);
+
 			if(startConnection)
 			{
 				HVR_Network.RegisterConnectCallback(this.OnConnect);
@@ -65,8 +71,8 @@ public class Initializer : MonoBehaviour
 
 		for(int i = 0; i < 72; i++)
 		{
-			indices[i] = (byte)Mathf.FloorToInt(72.0f*Random.Range(0,1));
-			intensities[i] = (byte)Mathf.FloorToInt(100.0f*Random.Range(0,1));
+			indices[i] = (byte)Mathf.FloorToInt(72.0f*UnityEngine.Random.Range(0,1));
+			intensities[i] = (byte)Mathf.FloorToInt(100.0f*UnityEngine.Random.Range(0,1));
 		}
 
 		//HVR_Network.SendMotorCommand(indices, intensities, 72);
@@ -97,5 +103,12 @@ public class Initializer : MonoBehaviour
 			Debug.Log("Ending connection");
 			HVR_Network.EndConnection();
 		}
+	}
+
+	private void OnLoggerEvent(string msg)
+	{
+		//string msg = Marshal.PtrToStringAnsi(msgPtr);
+
+		Debug.Log(msg);
 	}
 }
