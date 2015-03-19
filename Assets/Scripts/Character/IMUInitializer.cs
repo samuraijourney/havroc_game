@@ -7,10 +7,11 @@ public class IMUInitializer
 	private int m_zPoseIterations = 0;
 
 	private IMUCalibrator m_calibrator;
+	private IMUCalibrator.Pose m_currentPose = IMUCalibrator.Pose.X;
 	private int m_calibrationDuration;
 
 	private float m_timerCountdownStart = 10.0f;
-	private float m_timerCountdown = 0f;
+	private float m_timerCountdown = 0.0f;
 
 	private bool m_complete = false;
 
@@ -42,13 +43,22 @@ public class IMUInitializer
 		{
 			if(m_xPoseIterations < m_calibrationDuration)
 			{
+				if(m_xPoseIterations == 0)
+				{
+					Debug.Log ("Please orient yourself to match the character, you have " + m_timerCountdownStart + " seconds");
+					
+					m_timerCountdown = m_timerCountdownStart;
+				}
+
 				m_calibrator.Update(IMUCalibrator.Pose.X, xRotation, yRotation, zRotation);
 				m_xPoseIterations++;
-
+				
 				if(m_xPoseIterations == m_calibrationDuration)
 				{
+					m_currentPose = IMUCalibrator.Pose.Y;
+					
 					m_timerCountdown = m_timerCountdownStart;
-					Debug.Log ("Please orient yourself along the Y axis, you have " + m_timerCountdownStart + " seconds");
+					Debug.Log ("Please orient yourself to match the character, you have " + m_timerCountdownStart + " seconds");
 				}
 			}
 			else if(m_yPoseIterations < m_calibrationDuration)
@@ -58,8 +68,10 @@ public class IMUInitializer
 
 				if(m_yPoseIterations == m_calibrationDuration)
 				{
+					m_currentPose = IMUCalibrator.Pose.Z;
+
 					m_timerCountdown = m_timerCountdownStart;
-					Debug.Log ("Please orient yourself along the Z axis, you have " + m_timerCountdownStart + " seconds");
+					Debug.Log ("Please orient yourself to match the character, you have " + m_timerCountdownStart + " seconds");
 				}
 			}
 			else if(m_zPoseIterations < m_calibrationDuration)
@@ -69,6 +81,7 @@ public class IMUInitializer
 
 				if(m_zPoseIterations == m_calibrationDuration)
 				{
+					m_currentPose = IMUCalibrator.Pose.None;
 					m_complete = true;
 				}
 			}
@@ -78,6 +91,14 @@ public class IMUInitializer
 		else
 		{
 			m_timerCountdown -= deltaTime;
+		}
+	}
+
+	public IMUCalibrator.Pose CurrentPose
+	{
+		get
+		{
+			return m_currentPose;
 		}
 	}
 

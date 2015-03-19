@@ -3,12 +3,13 @@ using System.Collections;
 
 public class Initializer : MonoBehaviour 
 {
-	public enum ConnectTarget { Local, CC3200 };
+	public enum ConnectTarget { Local, CC3200, Custom };
 
 	public bool useDLL = true;
 	public bool startConnection = true;
 	public bool startTracking = true;
 	public ConnectTarget endpoint = ConnectTarget.Local;
+	public string customIP;
 
 	public void Awake () 
     {
@@ -30,6 +31,10 @@ public class Initializer : MonoBehaviour
 					else if(endpoint == ConnectTarget.CC3200)
 					{
 						HVR_Network.AsyncStartConnection();
+					}
+					else if(endpoint == ConnectTarget.Custom)
+					{
+						HVR_Network.AsyncStartConnection(customIP);
 					}
 				}
 				else

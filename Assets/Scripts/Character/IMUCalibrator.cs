@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class IMUCalibrator
 {
-	public enum Pose { X, Y, Z };
+	public enum Pose { X, Y, Z, None };
 
 	private Vector3 m_poseScales;
 	private Vector3 m_poseIterations;

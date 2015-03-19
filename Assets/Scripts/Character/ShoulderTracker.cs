@@ -44,7 +44,6 @@ public class ShoulderTracker : MonoBehaviour
 		HVR_Tracking.RegisterShoulderCallback(m_callback);
 	}
 
-	private static int iterations = 0;
 	public void Update () 
 	{
 		m_deltaTime = Time.deltaTime;
@@ -59,39 +58,34 @@ public class ShoulderTracker : MonoBehaviour
 		{
 			transform.eulerAngles = m_calibrator.ComputeRotation(roll, yaw, pitch);
 		}
-		/*else
+		else
 		{
-			if(iterations == 0)
+			switch(m_initializer.CurrentPose)
 			{
-				Debug.Log ("Mock calibration started");
+				case IMUCalibrator.Pose.X:
+				{
+					m_initializer.Update(m_deltaTime, 0, 0, 180/10);
+					transform.eulerAngles = xPoseGlobalRotation;
+					break;
+				}
+				case IMUCalibrator.Pose.Y:
+				{
+					m_initializer.Update(m_deltaTime, 0, 0, -90/10);
+					transform.eulerAngles = yPoseGlobalRotation;
+					break;
+				}
+				case IMUCalibrator.Pose.Z:
+				{
+					m_initializer.Update(m_deltaTime, 90/10, 90/10, -90/10);
+					transform.eulerAngles = zPoseGlobalRotation;
+					break;
+				}
+				default:
+				{
+					break;
+				}
 			}
-
-			if(iterations < m_calibrationDuration)
-			{
-				m_initializer.Update(m_deltaTime, 0, 0, 180/10);
-				transform.eulerAngles = xPoseGlobalRotation;
-			}
-			else if(iterations < 2*m_calibrationDuration)
-			{
-				m_initializer.Update(m_deltaTime, 0, 0, -90/10);
-				transform.eulerAngles = yPoseGlobalRotation;
-			}
-			else if(iterations < 3*m_calibrationDuration)
-			{
-				m_initializer.Update(m_deltaTime, 90/10, 90/10, -90/10);
-				transform.eulerAngles = zPoseGlobalRotation;
-			}
-
-			if(!m_initializer.Waiting)
-			{
-				iterations++;
-			}
-
-			if(iterations == 3*m_calibrationDuration)
-			{
-				Debug.Log ("Mock calibration done");
-			}
-		}*/
+		}
 	}
 
 	public void OnShoulderEvent(float s_yaw, float s_pitch, float s_roll, byte side)
