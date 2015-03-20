@@ -22,14 +22,10 @@ public class Initializer : MonoBehaviour
 			HVR_Logger.SetLogger(m_loggerCallback);
 
 			if(startConnection)
-			{
-				HVR_Network.RegisterConnectCallback(this.OnConnect);
-				
+			{	
 				// Initialize network connection
 				if (!HVR_Network.IsActive()) 
 				{
-					Debug.Log("Starting connection");
-
 					if(endpoint == ConnectTarget.Local)
 					{
 						HVR_Network.AsyncStartConnection("127.0.0.1");
@@ -83,11 +79,6 @@ public class Initializer : MonoBehaviour
 		}
 	}
 
-	public void OnConnect()
-	{
-		Debug.Log("Connect successful");
-	}
-
 	public void OnDestroy()
 	{
 		Cleanup();
@@ -97,18 +88,13 @@ public class Initializer : MonoBehaviour
 	{
 		if(useDLL)
 		{
-			Debug.Log("Ending tracking");
 			HVR_Tracking.EndTrackingService();
-			
-			Debug.Log("Ending connection");
 			HVR_Network.EndConnection();
 		}
 	}
 
 	private void OnLoggerEvent(string msg)
 	{
-		//string msg = Marshal.PtrToStringAnsi(msgPtr);
-
 		Debug.Log(msg);
 	}
 }

@@ -64,19 +64,19 @@ public class ElbowTracker : MonoBehaviour
 			{
 			case IMUCalibrator.Pose.X:
 			{
-				m_initializer.Update(m_deltaTime, 0, 0, 180/10);
+				//m_initializer.Update(m_deltaTime, 0, 0, 180/10);
 				transform.eulerAngles = xPoseGlobalRotation;
 				break;
 			}
 			case IMUCalibrator.Pose.Y:
 			{
-				m_initializer.Update(m_deltaTime, 0, 0, -90/10);
+				//m_initializer.Update(m_deltaTime, 0, 0, -90/10);
 				transform.eulerAngles = yPoseGlobalRotation;
 				break;
 			}
 			case IMUCalibrator.Pose.Z:
 			{
-				m_initializer.Update(m_deltaTime, 90/10, 90/10, -90/10);
+				//m_initializer.Update(m_deltaTime, 90/10, 90/10, -90/10);
 				transform.eulerAngles = zPoseGlobalRotation;
 				break;
 			}
