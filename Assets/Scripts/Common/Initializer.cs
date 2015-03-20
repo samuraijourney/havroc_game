@@ -93,8 +93,19 @@ public class Initializer : MonoBehaviour
 		}
 	}
 
-	private void OnLoggerEvent(string msg)
+	private void OnLoggerEvent(byte type, string msg)
 	{
-		Debug.Log(msg);
+		if(type == 0)
+		{
+			Debug.Log(msg);
+		}
+		else if(type == 1)
+		{
+			Debug.LogWarning(msg);
+		}
+		else if(type == 2)
+		{
+			Debug.LogError(msg);
+		}
 	}
 }
