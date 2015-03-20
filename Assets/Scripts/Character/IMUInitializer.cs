@@ -8,17 +8,16 @@ public class IMUInitializer
 
 	private IMUCalibrator m_calibrator;
 	private IMUCalibrator.Pose m_currentPose = IMUCalibrator.Pose.X;
-	private int m_calibrationDuration;
+	private int m_calibrationDuration = 100;
 
 	private float m_timerCountdownStart = 10.0f;
 	private float m_timerCountdown = 0.0f;
 
 	private bool m_complete = false;
 
-	public IMUInitializer(ref IMUCalibrator calibrator, int calibrationDuration)
+	public IMUInitializer(ref IMUCalibrator calibrator)
 	{
 		m_calibrator = calibrator;
-		m_calibrationDuration = calibrationDuration;
 	}
 
 	public void Reset(bool clearCalibrator)
@@ -91,6 +90,30 @@ public class IMUInitializer
 		else
 		{
 			m_timerCountdown -= deltaTime;
+		}
+	}
+
+	public int CalibrationDuration
+	{
+		get
+		{
+			return m_calibrationDuration;
+		}
+		set
+		{
+			m_calibrationDuration = value;
+		}
+	}
+
+	public float TimerDuration
+	{
+		get
+		{
+			return m_timerCountdownStart;
+		}
+		set
+		{
+			m_timerCountdownStart = value;
 		}
 	}
 

@@ -13,6 +13,9 @@ public class ElbowTracker : MonoBehaviour
 	public float pitch = 0.0f; // Rotation about z
 	public float roll  = 0.0f; // Rotation about y
 	
+	public float timerDuration = 10.0f;
+	public int calibrationDuration = 100;
+	
 	public Vector3 xPoseGlobalRotation;
 	public Vector3 yPoseGlobalRotation;
 	public Vector3 zPoseGlobalRotation;
@@ -27,33 +30,38 @@ public class ElbowTracker : MonoBehaviour
 	private IMUInitializer m_initializer;
 	
 	private HVR_Tracking.ElbowCallback m_callback;
+
+	private Vector3 m_lastRotation;
 	
 	private bool m_trackingOn = false;
-	private float m_deltaTime = 0.0f;
-	
-	private int m_calibrationDuration = 100;
-	
+	private float m_speed = 1.0f;
+
+	private DateTime m_lastDatetime;
+
 	// Use this for initialization
 	public void Start () 
 	{	
 		m_calibrator = new IMUCalibrator(xPoseGlobalRotation, yPoseGlobalRotation, zPoseGlobalRotation);
 		
-		m_initializer = new IMUInitializer(ref m_calibrator, m_calibrationDuration);
+		m_initializer = new IMUInitializer(ref m_calibrator);
 		
 		m_callback = new HVR_Tracking.ElbowCallback(OnElbowEvent);
 		HVR_Tracking.RegisterElbowCallback(m_callback);
+
+		m_lastRotation = xPoseGlobalRotation;
 	}
 	
-	public void Update () 
+	public void LateUpdate () 
 	{
-		m_deltaTime = Time.deltaTime;
-		
 		xPosePlayerRotation = m_calibrator.PlayerXPose;
 		yPosePlayerRotation = m_calibrator.PlayerYPose;
 		zPosePlayerRotation = m_calibrator.PlayerZPose;
 		
 		posePlayerScales = m_calibrator.PlayerPoseScales;
-		
+
+		m_initializer.TimerDuration = timerDuration;
+		m_initializer.CalibrationDuration = calibrationDuration;
+
 		if(m_initializer.Complete)
 		{
 			transform.eulerAngles = m_calibrator.ComputeRotation(roll, yaw, pitch);
@@ -64,20 +72,23 @@ public class ElbowTracker : MonoBehaviour
 			{
 			case IMUCalibrator.Pose.X:
 			{
-				//m_initializer.Update(m_deltaTime, 0, 0, 180/10);
-				transform.eulerAngles = xPoseGlobalRotation;
+				//m_initializer.Update(m_deltaTime, 0, 0, -180/10);
+				m_lastRotation = Vector3.Lerp(m_lastRotation, xPoseGlobalRotation, Time.deltaTime * m_speed);
+				transform.eulerAngles = m_lastRotation;
 				break;
 			}
 			case IMUCalibrator.Pose.Y:
 			{
 				//m_initializer.Update(m_deltaTime, 0, 0, -90/10);
-				transform.eulerAngles = yPoseGlobalRotation;
+				m_lastRotation = Vector3.Lerp(m_lastRotation, yPoseGlobalRotation, Time.deltaTime * m_speed);
+				transform.eulerAngles = m_lastRotation;
 				break;
 			}
 			case IMUCalibrator.Pose.Z:
 			{
 				//m_initializer.Update(m_deltaTime, 90/10, 90/10, -90/10);
-				transform.eulerAngles = zPoseGlobalRotation;
+				m_lastRotation = Vector3.Lerp(m_lastRotation, zPoseGlobalRotation, Time.deltaTime * m_speed);
+				transform.eulerAngles = m_lastRotation;
 				break;
 			}
 			default:
@@ -99,13 +110,17 @@ public class ElbowTracker : MonoBehaviour
 			if(!m_trackingOn)
 			{
 				Debug.Log("Starting elbow offset calibration");
+
+				m_lastDatetime = DateTime.Now;
 			}
 			
 			m_trackingOn = true;
 			
 			if(!m_initializer.Complete)
 			{
-				m_initializer.Update(m_deltaTime, s_roll, s_yaw, s_pitch);
+				TimeSpan delta = DateTime.Now - m_lastDatetime;
+				m_initializer.Update(((float)delta.TotalMilliseconds) / 1000.0f, s_roll, s_yaw, s_pitch);
+				m_lastDatetime = DateTime.Now;
 			}
 		}
 	}
