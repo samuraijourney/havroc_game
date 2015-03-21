@@ -3,11 +3,14 @@ using System.Collections;
 
 public class FightState : BaseState 
 {
-	public bool complete = false;
-
 	void Start () 
 	{
-		
+		SetTimedTransition (timedTransition);
+	}
+
+	override protected void Setup()
+	{
+
 	}
 	
 	override protected void UpdateState() 
@@ -17,11 +20,12 @@ public class FightState : BaseState
 		IsComplete = complete;
 	}
 	
-	override protected void Reset()
+	override protected void Clean()
 	{
 		complete = IsComplete;
+		SetTimedTransition (timedTransition);
 	}
-	
+
 	override public GameState State 
 	{ 
 		get

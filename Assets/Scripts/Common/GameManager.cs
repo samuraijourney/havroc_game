@@ -19,7 +19,6 @@ public class GameManager : MonoBehaviour
 	public event GameStateChangeCallback OnGameStateChangeEvent;
 
 	private static readonly int m_numOfStates = 4;
-	private ArrayList m_states;
 
 	private GameState m_currentGameState = GameState.None;
 
@@ -40,22 +39,15 @@ public class GameManager : MonoBehaviour
 
 	void Awake()
 	{
-		m_states = new ArrayList ();
-
-		IntroState 		 introState 	  = gameObject.AddComponent<IntroState> ();
-		CalibrationState calibrationState = gameObject.AddComponent<CalibrationState> ();
-		FightState 		 fightState 	  = gameObject.AddComponent<FightState> ();
-		EndState 		 endState 		  = gameObject.AddComponent<EndState> ();
+		IntroState 		 introState 	  = GameObject.Find("Intro State").GetComponent<IntroState>();
+		CalibrationState calibrationState = GameObject.Find("Calibration State").GetComponent<CalibrationState>();
+		FightState 		 fightState 	  = GameObject.Find("Fight State").GetComponent<FightState>();
+		EndState 		 endState 		  = GameObject.Find("End State").GetComponent<EndState>();
 
 		introState.OnGameStateCompleteEvent 	  += OnGameStateComplete;
 		calibrationState.OnGameStateCompleteEvent += OnGameStateComplete;
 		fightState.OnGameStateCompleteEvent 	  += OnGameStateComplete;
 		endState.OnGameStateCompleteEvent 		  += OnGameStateComplete;
-
-		m_states.Add(introState);
-		m_states.Add(calibrationState);
-		m_states.Add(fightState);
-		m_states.Add(endState);
 	}
 	
 	void Start () 

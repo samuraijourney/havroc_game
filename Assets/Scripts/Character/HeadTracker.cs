@@ -1,10 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class HeadTracker : MonoBehaviour {
-
+public class HeadTracker : MonoBehaviour, IBaseStateMember
+{
 	private GameObject m_ovrCentreAnchor;
 	private GameObject m_havrocPlayer;
+
+	private bool m_enabled = false;
 
 	// Use this for initialization
 	void Start () 
@@ -16,7 +18,26 @@ public class HeadTracker : MonoBehaviour {
 	// Update is called once per frame
 	void Update () 
 	{
-		transform.rotation = m_ovrCentreAnchor.transform.rotation;
-		transform.Rotate (new Vector3 (0, 90, -90));
+		if(m_enabled)
+		{
+			transform.rotation = m_ovrCentreAnchor.transform.rotation;
+			transform.Rotate (new Vector3 (0, 90, -90));	
+		}
+	}
+
+	public void OnStateBaseStart(GameState state)
+	{
+		if(state == GameState.Fight)
+		{
+			m_enabled = true;
+		}
+	}
+
+	public void OnStateBaseEnd(GameState state)
+	{
+		if(state == GameState.Fight)
+		{
+			m_enabled = false;
+		}
 	}
 }

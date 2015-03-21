@@ -3,9 +3,12 @@ using System.Collections;
 
 public class IntroState : BaseState 
 {
-	public bool complete = false;
-
 	void Start () 
+	{
+		SetTimedTransition (timedTransition);
+	}
+
+	override protected void Setup()
 	{
 		
 	}
@@ -13,15 +16,14 @@ public class IntroState : BaseState
 	override protected void UpdateState() 
 	{
 		Debug.Log ("IntroState");
-
-		IsComplete = complete;
 	}
 	
-	override protected void Reset()
+	override protected void Clean()
 	{
 		complete = IsComplete;
+		SetTimedTransition (timedTransition);
 	}
-	
+
 	override public GameState State 
 	{ 
 		get

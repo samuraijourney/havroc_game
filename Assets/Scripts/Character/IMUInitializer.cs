@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 
 public class IMUInitializer
 {
@@ -7,13 +8,17 @@ public class IMUInitializer
 	private int m_zPoseIterations = 0;
 
 	private IMUCalibrator m_calibrator;
-	private IMUCalibrator.Pose m_currentPose = IMUCalibrator.Pose.X;
+	private CalibrationPose m_currentPose = CalibrationPose.X;
+
 	private int m_calibrationDuration = 100;
 
 	private float m_timerCountdownStart = 10.0f;
 	private float m_timerCountdown = 0.0f;
 
 	private bool m_complete = false;
+
+	private DateTime m_lastDatetime;
+	private bool m_syncLastDateTime = true;
 
 	public IMUInitializer(ref IMUCalibrator calibrator)
 	{
@@ -36,10 +41,23 @@ public class IMUInitializer
 		}
 	}
 	
-	public void Update(float deltaTime, float xRotation, float yRotation, float zRotation)
+	public void Update(float xRotation, float yRotation, float zRotation)
 	{
+		if(m_syncLastDateTime)
+		{
+			m_lastDatetime = DateTime.Now;
+
+			m_syncLastDateTime = false;
+		}
+
+		TimeSpan delta = DateTime.Now - m_lastDatetime;
+		float deltaTime = (float)delta.TotalMilliseconds / 1000.0f;
+		m_lastDatetime = DateTime.Now;
+
 		if(m_timerCountdown < 0.1f)
 		{
+			m_syncLastDateTime = true;
+
 			if(m_xPoseIterations < m_calibrationDuration)
 			{
 				if(m_xPoseIterations == 0)
@@ -49,12 +67,12 @@ public class IMUInitializer
 					m_timerCountdown = m_timerCountdownStart;
 				}
 
-				m_calibrator.Update(IMUCalibrator.Pose.X, xRotation, yRotation, zRotation);
+				m_calibrator.Update(CalibrationPose.X, xRotation, yRotation, zRotation);
 				m_xPoseIterations++;
 				
 				if(m_xPoseIterations == m_calibrationDuration)
 				{
-					m_currentPose = IMUCalibrator.Pose.Y;
+					m_currentPose = CalibrationPose.Y;
 					
 					m_timerCountdown = m_timerCountdownStart;
 					Debug.Log ("Please orient yourself to match the character, you have " + m_timerCountdownStart + " seconds");
@@ -62,12 +80,12 @@ public class IMUInitializer
 			}
 			else if(m_yPoseIterations < m_calibrationDuration)
 			{
-				m_calibrator.Update(IMUCalibrator.Pose.Y, xRotation, yRotation, zRotation);
+				m_calibrator.Update(CalibrationPose.Y, xRotation, yRotation, zRotation);
 				m_yPoseIterations++;
 
 				if(m_yPoseIterations == m_calibrationDuration)
 				{
-					m_currentPose = IMUCalibrator.Pose.Z;
+					m_currentPose = CalibrationPose.Z;
 
 					m_timerCountdown = m_timerCountdownStart;
 					Debug.Log ("Please orient yourself to match the character, you have " + m_timerCountdownStart + " seconds");
@@ -75,12 +93,12 @@ public class IMUInitializer
 			}
 			else if(m_zPoseIterations < m_calibrationDuration)
 			{
-				m_calibrator.Update(IMUCalibrator.Pose.Z, xRotation, yRotation, zRotation);
+				m_calibrator.Update(CalibrationPose.Z, xRotation, yRotation, zRotation);
 				m_zPoseIterations++;
 
 				if(m_zPoseIterations == m_calibrationDuration)
 				{
-					m_currentPose = IMUCalibrator.Pose.None;
+					m_currentPose = CalibrationPose.None;
 					m_complete = true;
 				}
 			}
@@ -117,7 +135,7 @@ public class IMUInitializer
 		}
 	}
 
-	public IMUCalibrator.Pose CurrentPose
+	public CalibrationPose CurrentPose
 	{
 		get
 		{

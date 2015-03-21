@@ -2,8 +2,6 @@ using UnityEngine;
 
 public class IMUCalibrator
 {
-	public enum Pose { X, Y, Z, None };
-
 	private Vector3 m_poseScales;
 	private Vector3 m_poseIterations;
 	
@@ -39,11 +37,11 @@ public class IMUCalibrator
 		m_poseIterations = new Vector3(0,0,0);
 	}
 	
-	public void Update(Pose pose, float xRotation, float yRotation, float zRotation)
+	public void Update(CalibrationPose pose, float xRotation, float yRotation, float zRotation)
 	{
 		switch(pose)
 		{
-			case Pose.X:
+			case CalibrationPose.X:
 			{
 				m_xPosePlayerRotationAccum.x += xRotation;
 				m_xPosePlayerRotationAccum.y += yRotation;
@@ -57,7 +55,7 @@ public class IMUCalibrator
 				
 				break;
 			}
-			case Pose.Y:
+			case CalibrationPose.Y:
 			{
 				m_yPosePlayerRotationAccum.x += xRotation;
 				m_yPosePlayerRotationAccum.y += yRotation;
@@ -71,7 +69,7 @@ public class IMUCalibrator
 				
 				break;
 			}
-			case Pose.Z:
+			case CalibrationPose.Z:
 			{
 				m_zPosePlayerRotationAccum.x += xRotation;
 				m_zPosePlayerRotationAccum.y += yRotation;
@@ -142,19 +140,19 @@ public class IMUCalibrator
 		}
 	}
 
-	public int GetIterationsOfPose(Pose pose)
+	public int GetIterationsOfPose(CalibrationPose pose)
 	{
 		switch(pose)
 		{
-			case Pose.X:
+			case CalibrationPose.X:
 			{
 				return (int)m_poseIterations.x;
 			}
-			case Pose.Y:
+			case CalibrationPose.Y:
 			{
 				return (int)m_poseIterations.y;
 			}
-			case Pose.Z:
+			case CalibrationPose.Z:
 			{
 				return (int)m_poseIterations.z;
 			}

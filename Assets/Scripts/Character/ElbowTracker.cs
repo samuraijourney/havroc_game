@@ -3,90 +3,58 @@ using System;
 using System.Collections;
 using System.Runtime.InteropServices;
 
-public class ElbowTracker : MonoBehaviour 
+public class ElbowTracker : MonoBehaviour, ICalibrationStateMember 
 {
-	public enum Arm { Left, Right };
-	
 	public Arm arm = Arm.Right;
 	
 	public float yaw   = 0.0f; // Rotation about x
 	public float pitch = 0.0f; // Rotation about z
 	public float roll  = 0.0f; // Rotation about y
 	
-	public float timerDuration = 10.0f;
-	public int calibrationDuration = 100;
-	
 	public Vector3 xPoseGlobalRotation;
 	public Vector3 yPoseGlobalRotation;
 	public Vector3 zPoseGlobalRotation;
 	
-	public Vector3 xPosePlayerRotation;
-	public Vector3 yPosePlayerRotation;
-	public Vector3 zPosePlayerRotation;
-	
-	public Vector3 posePlayerScales;
+	private HVR_Tracking.ElbowCallback m_callback;
 	
 	private IMUCalibrator m_calibrator;
-	private IMUInitializer m_initializer;
+	private CalibrationPose m_currentPose;
 	
-	private HVR_Tracking.ElbowCallback m_callback;
-
 	private Vector3 m_lastRotation;
 	
 	private bool m_trackingOn = false;
 	private float m_speed = 1.0f;
-
-	private DateTime m_lastDatetime;
-
+	
 	// Use this for initialization
 	public void Start () 
 	{	
-		m_calibrator = new IMUCalibrator(xPoseGlobalRotation, yPoseGlobalRotation, zPoseGlobalRotation);
-		
-		m_initializer = new IMUInitializer(ref m_calibrator);
-		
 		m_callback = new HVR_Tracking.ElbowCallback(OnElbowEvent);
-		HVR_Tracking.RegisterElbowCallback(m_callback);
-
-		m_lastRotation = xPoseGlobalRotation;
 	}
 	
 	public void LateUpdate () 
 	{
-		xPosePlayerRotation = m_calibrator.PlayerXPose;
-		yPosePlayerRotation = m_calibrator.PlayerYPose;
-		zPosePlayerRotation = m_calibrator.PlayerZPose;
-		
-		posePlayerScales = m_calibrator.PlayerPoseScales;
-
-		m_initializer.TimerDuration = timerDuration;
-		m_initializer.CalibrationDuration = calibrationDuration;
-
-		if(m_initializer.Complete)
+		if(m_trackingOn)
 		{
 			transform.eulerAngles = m_calibrator.ComputeRotation(roll, yaw, pitch);
 		}
 		else
 		{
-			switch(m_initializer.CurrentPose)
+			switch(m_currentPose)
 			{
-			case IMUCalibrator.Pose.X:
+			case CalibrationPose.X:
 			{
-				//m_initializer.Update(m_deltaTime, 0, 0, -180/10);
 				m_lastRotation = Vector3.Lerp(m_lastRotation, xPoseGlobalRotation, Time.deltaTime * m_speed);
 				transform.eulerAngles = m_lastRotation;
 				break;
 			}
-			case IMUCalibrator.Pose.Y:
+			case CalibrationPose.Y:
 			{
-				//m_initializer.Update(m_deltaTime, 0, 0, -90/10);
 				m_lastRotation = Vector3.Lerp(m_lastRotation, yPoseGlobalRotation, Time.deltaTime * m_speed);
 				transform.eulerAngles = m_lastRotation;
 				break;
 			}
-			case IMUCalibrator.Pose.Z:
+			case CalibrationPose.Z:
 			{
-				//m_initializer.Update(m_deltaTime, 90/10, 90/10, -90/10);
 				m_lastRotation = Vector3.Lerp(m_lastRotation, zPoseGlobalRotation, Time.deltaTime * m_speed);
 				transform.eulerAngles = m_lastRotation;
 				break;
@@ -106,22 +74,74 @@ public class ElbowTracker : MonoBehaviour
 			yaw   = s_yaw;
 			pitch = s_pitch;
 			roll  = s_roll;
-			
-			if(!m_trackingOn)
-			{
-				Debug.Log("Starting elbow offset calibration");
-
-				m_lastDatetime = DateTime.Now;
-			}
-			
-			m_trackingOn = true;
-			
-			if(!m_initializer.Complete)
-			{
-				TimeSpan delta = DateTime.Now - m_lastDatetime;
-				m_initializer.Update(((float)delta.TotalMilliseconds) / 1000.0f, s_roll, s_yaw, s_pitch);
-				m_lastDatetime = DateTime.Now;
-			}
+		}
+	}
+	
+	public void OnStateCalibrationPoseUpdate(CalibrationPose pose)
+	{
+		m_currentPose = pose;
+	}
+	
+	public void OnStateCalibrationDone(IMUCalibrator calibrator)
+	{
+		m_calibrator = calibrator;
+		
+		HVR_Tracking.RegisterElbowCallback(m_callback);
+		
+		m_trackingOn = true;
+	}
+	
+	public void OnStateBaseStart(GameState state)
+	{
+		m_lastRotation = xPoseGlobalRotation;
+		
+		HVR_Tracking.UnregisterElbowCallback(m_callback);
+		
+		m_trackingOn = false;
+	}
+	
+	public void OnStateBaseEnd(GameState state)
+	{
+		
+	}
+	
+	public Vector3 GlobalXPosition
+	{ 
+		get
+		{
+			return xPoseGlobalRotation;
+		}
+	}
+	
+	public Vector3 GlobalYPosition
+	{ 
+		get
+		{
+			return yPoseGlobalRotation;
+		}
+	}
+	
+	public Vector3 GlobalZPosition
+	{ 
+		get
+		{
+			return zPoseGlobalRotation;
+		}
+	}
+	
+	public Arm Arm
+	{ 
+		get
+		{
+			return arm;
+		}
+	}
+	
+	public Joint Joint
+	{ 
+		get
+		{
+			return Joint.Elbow;
 		}
 	}
 }
