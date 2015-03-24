@@ -15,7 +15,7 @@ public class FightState : BaseState
 	
 	override protected void UpdateState() 
 	{
-		Debug.Log ("FightState");
+		//Debug.Log ("FightState");
 
 		IsComplete = complete;
 	}

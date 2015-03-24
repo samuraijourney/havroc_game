@@ -15,7 +15,7 @@ public class EndState : BaseState
 	
 	override protected void UpdateState() 
 	{
-		Debug.Log ("EndState");
+		//Debug.Log ("EndState");
 	}
 	
 	override protected void Clean()
