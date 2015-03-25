@@ -16,12 +16,17 @@ public class ShoulderTracker : MonoBehaviour, ICalibrationStateMember
 	public float y = 0.0f;
 	public float z = 0.0f;
 
-	public Vector3 rotationSign = new Vector3(1,1,1);
+	public Vector3 rotationSign = new Vector3(-1,-1,-1);
 	public Vector3 rotation;
 	
 	public Vector3 xPoseGlobalRotation;
 	public Vector3 yPoseGlobalRotation;
 	public Vector3 zPoseGlobalRotation;
+
+	public Vector3 step1Rotation;
+	public Vector3 step2Rotation;
+	public Vector3 step3Rotation;
+	public Vector3 step4Rotation;
 
 	private HVR_Tracking.ShoulderCallback m_callback;
 
@@ -46,8 +51,12 @@ public class ShoulderTracker : MonoBehaviour, ICalibrationStateMember
 		if(m_trackingOn)
 		{
 			m_calibrator.Sign = rotationSign;
+			m_calibrator.ComputeRotation(w, x, y, z, rotation, transform);
 
-			m_calibrator.ComputeRotation(w, x, y, z, rotation, transform, Joint);
+			step1Rotation = m_calibrator.Step1Rotation;
+			step2Rotation = m_calibrator.Step2Rotation;
+			step3Rotation = m_calibrator.Step3Rotation;
+			step4Rotation = m_calibrator.Step4Rotation;
 		}
 		else if(m_calibrating)
 		{

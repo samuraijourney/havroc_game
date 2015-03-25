@@ -78,10 +78,10 @@ public class Initializer : MonoBehaviour
 				motorIndices[i] = (byte)UnityEngine.Random.Range(0,motorMaxIndex);
 				motorIntensities[i] = 255;
 
-				Debug.Log ("Sent motor - Index:" + motorIndices[i] + " Intensity:" + motorIntensities[i]);
+				//Debug.Log ("Sent motor - Index:" + motorIndices[i] + " Intensity:" + motorIntensities[i]);
 			}
 			
-			HVR_Network.SendMotorCommand(motorIndices, motorIntensities, motorLength);
+			//HVR_Network.SendMotorCommand(motorIndices, motorIntensities, motorLength);
 
 			m_time -= motorSendInterval;
 		}

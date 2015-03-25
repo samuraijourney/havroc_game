@@ -16,7 +16,7 @@ public class ElbowTracker : MonoBehaviour, ICalibrationStateMember
 	public float y = 0.0f;
 	public float z = 0.0f;
 
-	public Vector3 rotationSign = new Vector3(1,1,1);
+	public Vector3 rotationSign = new Vector3(-1,-1,-1);
 	public Vector3 rotation;
 	
 	public Vector3 xPoseGlobalRotation;
@@ -46,8 +46,7 @@ public class ElbowTracker : MonoBehaviour, ICalibrationStateMember
 		if(m_trackingOn)
 		{
 			m_calibrator.Sign = rotationSign;
-
-			m_calibrator.ComputeRotation(w, x, y, z, rotation, transform, Joint);
+			m_calibrator.ComputeRotation(w, x, y, z, rotation, transform);
 		}
 		else if(m_calibrating)
 		{

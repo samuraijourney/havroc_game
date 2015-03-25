@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class MatchDisplayController : MonoBehaviour 
+public class MatchDisplayController : MonoBehaviour, IFightStateMember
 {
 	private GameObject m_ovrCentreAnchor;
 	private float m_distance;
@@ -17,6 +17,8 @@ public class MatchDisplayController : MonoBehaviour
 
 		m_scale = transform.localScale;
 		m_rotation = transform.eulerAngles;
+
+		gameObject.SetActive(false);
 	}
 
 	// Update is called once per frame
@@ -24,5 +26,21 @@ public class MatchDisplayController : MonoBehaviour
 	{
 		transform.localScale = m_scale;
 		transform.eulerAngles = new Vector3(m_ovrCentreAnchor.transform.eulerAngles.x,m_ovrCentreAnchor.transform.eulerAngles.y,m_rotation.z);
+	}
+
+	public void OnStateBaseStart(GameState state)
+	{
+		if(state == GameState.Fight)
+		{
+			gameObject.SetActive(true);
+		}
+	}
+
+	public void OnStateBaseEnd(GameState state)
+	{
+		if(state == GameState.Fight)
+		{
+			gameObject.SetActive(false);
+		}
 	}
 }
