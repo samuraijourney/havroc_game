@@ -76,7 +76,6 @@ public class TimerMonitor : MonoBehaviour, IBaseStateMember
 				if(OnTimeoutEvent != null)
 				{
 					OnTimeoutEvent();
-					Debug.Log ("Timeout event called");
 					m_enabled = false;
 				}
 			}

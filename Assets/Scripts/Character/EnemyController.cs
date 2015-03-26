@@ -203,7 +203,7 @@ public class EnemyController : MonoBehaviour, IFightStateMember
 
 	public void OnStateBaseStart(GameState state)
 	{
-		if(state == GameState.Fight)
+		if(state == GameState.Intro)
 		{
 			win = false;
 			lose = false;

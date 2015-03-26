@@ -80,9 +80,8 @@ public class HealthMonitor : MonoBehaviour, IFightStateMember
 
 	public void OnStateBaseStart(GameState state)
 	{
-		if(state == GameState.Fight)
+		if(state == GameState.Intro)
 		{
-			health = maxHealth;
 			m_enabled = true;
 		}
 	}
@@ -93,6 +92,7 @@ public class HealthMonitor : MonoBehaviour, IFightStateMember
 		{
 			m_enabled = false;
 			m_destroy = false;
+			health = maxHealth;
 		}
 	}
 
@@ -107,6 +107,5 @@ public class HealthMonitor : MonoBehaviour, IFightStateMember
 	public void OnStateFightTimeout()
 	{
 		m_destroy = true;
-		Debug.Log ("HealthMonitor timeout is called");
 	}
 }

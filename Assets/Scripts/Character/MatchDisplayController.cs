@@ -30,7 +30,7 @@ public class MatchDisplayController : MonoBehaviour, IBaseStateMember
 
 	public void OnStateBaseStart(GameState state)
 	{
-		if(state == GameState.Fight)
+		if(state == GameState.Intro)
 		{
 			gameObject.SetActive(true);
 		}

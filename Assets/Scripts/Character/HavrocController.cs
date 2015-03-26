@@ -137,7 +137,7 @@ public class HavrocController : MonoBehaviour, IFightStateMember {
 
 	public void OnStateBaseStart(GameState state)
 	{
-		if(state == GameState.Fight)
+		if(state == GameState.Intro)
 		{
 			win = false;
 			lose = false;
@@ -148,7 +148,7 @@ public class HavrocController : MonoBehaviour, IFightStateMember {
 	
 	public void OnStateBaseEnd(GameState state)
 	{
-		if(state == GameState.Fight)
+		if(state == GameState.Intro)
 		{
 			//m_anim.enabled = false; // Change this to end state to give some time for death anim to end
 		}
