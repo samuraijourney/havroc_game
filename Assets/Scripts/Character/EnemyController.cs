@@ -21,6 +21,7 @@ public class EnemyController : MonoBehaviour, IFightStateMember
 	private Transform enemy;								// a transform to Lerp the camera to during head look
 
 	private int attackCount = 0;
+	private bool enabled = false;
 
 	int idleState = Animator.StringToHash("Base Layer.Idle");	
 	int hitByJabState = Animator.StringToHash("Base Layer.Hit By Jab");			// these integers are references to our animator's states
@@ -41,72 +42,75 @@ public class EnemyController : MonoBehaviour, IFightStateMember
 
 	void FixedUpdate ()
 	{
-		anim.speed = animSpeed;									// set the speed of our animator to the public variable 'animSpeed'
-		currentBaseState = anim.GetCurrentAnimatorStateInfo(0);	// set our currentState variable to the current state of the Base Layer (0) of animation
-		nextBaseState = anim.GetNextAnimatorStateInfo (0);
-
-		if(!win && !lose)
+		if(enabled)
 		{
-			AnimateBlock(Input.GetButton("Block"));
-		}
+			anim.speed = animSpeed;									// set the speed of our animator to the public variable 'animSpeed'
+			currentBaseState = anim.GetCurrentAnimatorStateInfo(0);	// set our currentState variable to the current state of the Base Layer (0) of animation
+			nextBaseState = anim.GetNextAnimatorStateInfo (0);
 
-		if (currentBaseState.nameHash == idleState)
-		{
-			if(win && nextBaseState.nameHash != winState)
+			if(!win && !lose)
 			{
-				AnimateWin(true);
+				AnimateBlock(Input.GetButton("Block"));
 			}
-			else if(lose && nextBaseState.nameHash != knockoutState)
+
+			if (currentBaseState.nameHash == idleState)
 			{
-				AnimateLose(true);
+				if(win && nextBaseState.nameHash != winState)
+				{
+					AnimateWin(true);
+				}
+				else if(lose && nextBaseState.nameHash != knockoutState)
+				{
+					AnimateLose(true);
+				}
+				else if(Input.GetButtonDown("Right Punch") && nextBaseState.nameHash != rightCrossState)
+				{
+					AnimateRightPunch(true);
+				}
+				else if(Input.GetButtonDown("Left Punch") && nextBaseState.nameHash != leftJabState)
+				{
+					AnimateLeftPunch(true);
+				}
 			}
-			else if(Input.GetButtonDown("Right Punch") && nextBaseState.nameHash != rightCrossState)
+
+			else if (currentBaseState.nameHash == rightCrossState)
 			{
-				AnimateRightPunch(true);
+				AnimateRightPunch(false);
+
+				if(Input.GetButtonDown("Left Punch") && nextBaseState.nameHash != leftJabState)
+				{
+					AnimateLeftPunch(true);
+				}
 			}
-			else if(Input.GetButtonDown("Left Punch") && nextBaseState.nameHash != leftJabState)
+
+			else if (currentBaseState.nameHash == leftJabState)
 			{
-				AnimateLeftPunch(true);
+				AnimateLeftPunch(false);
+
+				if(Input.GetButtonDown("Right Punch") && nextBaseState.nameHash != rightCrossState)
+				{
+					AnimateRightPunch(true);
+				}
 			}
-		}
 
-		else if (currentBaseState.nameHash == rightCrossState)
-		{
-			AnimateRightPunch(false);
-
-			if(Input.GetButtonDown("Left Punch") && nextBaseState.nameHash != leftJabState)
+			else if (currentBaseState.nameHash == knockoutCountdownState)
 			{
-				AnimateLeftPunch(true);
+				AnimateKnockdown(false);
 			}
-		}
 
-		else if (currentBaseState.nameHash == leftJabState)
-		{
-			AnimateLeftPunch(false);
-
-			if(Input.GetButtonDown("Right Punch") && nextBaseState.nameHash != rightCrossState)
+			else if (!win && currentBaseState.nameHash == winState)
 			{
-				AnimateRightPunch(true);
+				AnimateWin(false);
 			}
-		}
 
-		else if (currentBaseState.nameHash == knockoutCountdownState)
-		{
-			AnimateKnockdown(false);
+			else if (!lose && currentBaseState.nameHash == knockoutState)
+			{
+				AnimateLose(false);
+			}
+			
+			transform.LookAt (enemy.position);
+			transform.position = enemy.position + Vector3.ClampMagnitude(transform.position - enemy.position, maxDistance);
 		}
-
-		else if (!win && currentBaseState.nameHash == winState)
-		{
-			AnimateWin(false);
-		}
-
-		else if (!lose && currentBaseState.nameHash == knockoutState)
-		{
-			AnimateLose(false);
-		}
-		
-		transform.LookAt (enemy.position);
-		transform.position = enemy.position + Vector3.ClampMagnitude(transform.position - enemy.position, maxDistance);
 	}
 
 	private void AnimateBlock(bool on)
@@ -209,6 +213,11 @@ public class EnemyController : MonoBehaviour, IFightStateMember
 			lose = false;
 		}
 
+		if(state == GameState.Fight)
+		{
+			enabled = true;
+		}
+
 		if(state == GameState.Calibration)
 		{
 			gameObject.SetActive(false);
@@ -220,6 +229,11 @@ public class EnemyController : MonoBehaviour, IFightStateMember
 		if(state == GameState.Calibration)
 		{
 			gameObject.SetActive(true);
+		}
+
+		if(state == GameState.End)
+		{
+			enabled = false;
 		}
 	}
 }

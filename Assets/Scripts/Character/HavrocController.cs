@@ -15,7 +15,7 @@ public class HavrocController : MonoBehaviour, IFightStateMember {
 
 	private bool m_isAttacking = false;
 
-	private bool m_pass = true;
+	private bool m_pass = false;
 	private int m_damageCount = 0;
 	
 	private Animator m_anim;

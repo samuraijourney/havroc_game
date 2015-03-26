@@ -55,6 +55,7 @@ public class EndState : BaseState
 	
 	override protected void Clean()
 	{
+		m_oculusCamera.transform.parent = m_oculusParent;
 	}
 
 	override public GameState State 

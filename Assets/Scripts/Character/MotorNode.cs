@@ -66,6 +66,12 @@ public class MotorNode : MonoBehaviour
 			byte[] motorIndexArr = new byte[]{(byte)motorIndex};
 			byte[] motorIntensityArr = new byte[]{ComputeMotorIntensity(col)};
 			HVR_Network.SendMotorCommand(motorIndexArr,motorIntensityArr,1);
+
+			if (col.gameObject.CompareTag("Fist"))
+			{
+				//col.rigidbody.velocity
+				return;
+			}
 		}
 	}
 
