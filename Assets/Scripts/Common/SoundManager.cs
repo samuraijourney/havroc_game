@@ -161,10 +161,12 @@ public class SoundManager : MonoBehaviour, IIntroStateMember, IFightStateMember,
 	
 	public void OnStateFightWin(PlayerType type)
 	{
+		m_fadeOut = true;
 	}
 	
 	public void OnStateFightLose(PlayerType type)
 	{
+		m_fadeOut = true;
 	}
 	
 	public void OnStateFightTimeout()
