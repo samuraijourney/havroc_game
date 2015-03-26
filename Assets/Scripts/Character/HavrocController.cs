@@ -2,7 +2,7 @@
 using System;
 using System.Collections;
 
-public class HavrocController : MonoBehaviour, IFightStateMember {
+public class HavrocController : MonoBehaviour, IFightStateMember, IEndStateMember {
 
 	public float damagePerHit = 1.0f;
 	public float blockingReduction = 10.0f;
@@ -86,11 +86,48 @@ public class HavrocController : MonoBehaviour, IFightStateMember {
 
 	bool IsArmMotorNode(int index)
 	{
+		if(index >= 4 && index <= 15)
+		{
+			return true;
+		}
+
+		if(index >= 58 && index <= 69)
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	bool IsFistMotorNode(int index)
+	{
+		if(index >= 1 && index <= 3)
+		{
+			return true;
+		}
+		
+		if(index >= 70 && index <= 72)
+		{
+			return true;
+		}
+		
+		return false;
+	}
+
+	bool IsTorsoMotorNode(int index)
+	{
+		if(index >= 16 && index <= 57)
+		{
+			return true;
+		}
+		
 		return false;
 	}
 
 	void PassCollisionData(CollisionData data)
 	{
+		m_isAttacking = false;//IsFistMotorNode(data.motorIndex);
+
 		if(data.collision.gameObject.CompareTag("Player"))
 		{
 			if(m_pass)
@@ -99,6 +136,7 @@ public class HavrocController : MonoBehaviour, IFightStateMember {
 				m_pass = false;
 
 				Debug.Log("Damage: " + damagePerHit);
+				Debug.Log("Blocked: " + IsArmMotorNode(data.motorIndex));
 			}
 		}
 		else
@@ -107,8 +145,6 @@ public class HavrocController : MonoBehaviour, IFightStateMember {
 
 			Debug.Log("Damage: " + damagePerHit);
 		}
-
-		m_isAttacking = IsArmMotorNode(data.motorIndex);
 
 		//Debug.Log ("Motor " + data.motorIndex + " Hit");
 	}
@@ -153,5 +189,15 @@ public class HavrocController : MonoBehaviour, IFightStateMember {
 	
 	public void OnStateBaseEnd(GameState state)
 	{
+	}
+
+	public void OnStateEndCameraPanAway()
+	{
+	}
+	
+	public void OnStateEndCameraPanBack()
+	{
+		win = false;
+		lose = false;
 	}
 }

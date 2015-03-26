@@ -14,9 +14,9 @@ public class ShoulderFPSDisplay : MonoBehaviour
 		m_textMesh = GetComponent<TextMesh> ();
 		m_fpsMonitor = new FPSMonitor (4.0f);
 
-		m_callback = new HVR_Tracking.ShoulderCallback(OnShoulderEvent);
+		//m_callback = new HVR_Tracking.ShoulderCallback(OnShoulderEvent);
 
-		HVR_Tracking.RegisterShoulderCallback(m_callback);
+		//HVR_Tracking.RegisterShoulderCallback(m_callback);
 	}
 
 	void Update () 

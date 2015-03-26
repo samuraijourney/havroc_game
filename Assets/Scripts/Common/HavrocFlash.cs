@@ -36,4 +36,12 @@ public class HavrocFlash : MonoBehaviour, IEndStateMember
 			m_textMesh.GetComponent<MeshRenderer>().enabled = false;
 		}
 	}
+
+	public void OnStateEndCameraPanAway()
+	{
+	}
+
+	public void OnStateEndCameraPanBack()
+	{
+	}
 }

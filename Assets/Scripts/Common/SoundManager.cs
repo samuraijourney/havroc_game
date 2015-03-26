@@ -22,12 +22,12 @@ public class SoundManager : MonoBehaviour, IIntroStateMember, IFightStateMember,
 	private AudioSource[] m_chainedFatality;
 	private AudioSource[] m_chainedExcellent;
 
-	private float[] m_delayRoundOneFight = new float[]{0,0.5f,0};
-	private float[] m_delayRoundTwoFight = new float[]{0,0.5f,0};
-	private float[] m_delayRoundThreeFight = new float[]{0,0.5f,0};
-	private float[] m_delayRoundFourFight = new float[]{0,0.5f,0};
-	private float[] m_delayFatality = new float[]{0};
-	private float[] m_delayExcellent = new float[]{0};
+	private float[] m_delayRoundOneFight;
+	private float[] m_delayRoundTwoFight;
+	private float[] m_delayRoundThreeFight;
+	private float[] m_delayRoundFourFight;
+	private float[] m_delayFatality;
+	private float[] m_delayExcellent;
 	
 	private bool m_fadeOut = false;
 
@@ -66,6 +66,13 @@ public class SoundManager : MonoBehaviour, IIntroStateMember, IFightStateMember,
 		m_chainedRoundFourFight = new AudioSource[]{m_roundAudio, m_fourAudio, m_fightAudio};
 		m_chainedFatality = new AudioSource[]{m_fatalityAudio};
 		m_chainedExcellent = new AudioSource[]{m_excellentAudio};
+
+		m_delayRoundOneFight = new float[]{0,0.5f,0};
+		m_delayRoundTwoFight = new float[]{0,0.5f,0};
+		m_delayRoundThreeFight = new float[]{0,0.5f,0};
+		m_delayRoundFourFight = new float[]{0,0.5f,0};
+		m_delayFatality = new float[]{0};
+		m_delayExcellent = new float[]{0};
 	}
 	
 	void Update () 
@@ -172,5 +179,13 @@ public class SoundManager : MonoBehaviour, IIntroStateMember, IFightStateMember,
 	public void OnStateFightTimeout()
 	{
 		m_fadeOut = true;
+	}
+
+	public void OnStateEndCameraPanAway()
+	{
+	}
+	
+	public void OnStateEndCameraPanBack()
+	{
 	}
 }

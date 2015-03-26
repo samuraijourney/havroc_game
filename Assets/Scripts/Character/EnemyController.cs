@@ -177,9 +177,12 @@ public class EnemyController : MonoBehaviour, IFightStateMember
 
 	void OnCollisionEnter(Collision col)
 	{
-		if (havrocController.IsAttacking)
+		if(GameManager.Instance.CurrentGameState == GameState.Fight)
 		{
-			healthBar.SendMessage("ApplyDamage", currentBaseState.nameHash == blockState ? damagePerHit / blockingReduction : damagePerHit);
+			if (havrocController.IsAttacking)
+			{
+				healthBar.SendMessage("ApplyDamage", currentBaseState.nameHash == blockState ? damagePerHit / blockingReduction : damagePerHit);
+			}
 		}
 	}
 

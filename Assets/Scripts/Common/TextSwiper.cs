@@ -13,7 +13,7 @@ public class TextSwiper : MonoBehaviour, IIntroStateMember
 	private Vector3 m_localStartPosition = new Vector3(0.25f,0,0);
 	private Vector3 m_localStopPosition = new Vector3(-0.25f,0,0);
 
-	private string[] m_texts = new string[]{};
+	private string[] m_texts;
 
 	private int m_currentIndex = 0;
 
@@ -27,6 +27,7 @@ public class TextSwiper : MonoBehaviour, IIntroStateMember
 	// Use this for initialization
 	void Start () 
 	{
+		m_texts = new string[]{};
 	}
 
 	private float m_accum = 0f;

@@ -11,12 +11,16 @@ public class EndState : BaseState
 
 	private bool m_return = false;
 
+	private IEndStateMember[] m_members;
+
 	void Start () 
 	{
 		m_oculusCamera = GameObject.Find ("OVRPlayerController");
 
 		m_endTransform = transform.Find ("End View");
 		m_fightTransform = (GameObject.Find ("Fight View")).transform;
+
+		m_members = GetAllInterfaceInstances<IEndStateMember>();
 	}
 
 	override protected void Setup()
@@ -25,6 +29,11 @@ public class EndState : BaseState
 
 		m_oculusParent = m_oculusCamera.transform.parent;
 		m_oculusCamera.transform.parent = transform;
+
+		foreach(IEndStateMember member in m_members)
+		{
+			member.OnStateEndCameraPanAway();
+		}
 	}
 	
 	override protected void UpdateState() 
@@ -50,6 +59,11 @@ public class EndState : BaseState
 		if(Input.GetButtonDown("Reset"))
 		{
 			m_return = true;
+
+			foreach(IEndStateMember member in m_members)
+			{
+				member.OnStateEndCameraPanBack();
+			}
 		}
 	}
 	

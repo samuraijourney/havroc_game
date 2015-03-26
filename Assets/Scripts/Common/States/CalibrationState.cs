@@ -8,7 +8,7 @@ public enum Joint 			{ Shoulder, Elbow, Wrist, Hip };
 
 public class CalibrationState : BaseState 
 {
-	private enum CameraState { Away, Towards, Still };
+	private enum CameraState { Away = 1, Still = 2, Towards = 3 };
 
 	public struct CalibratorPack
 	{
@@ -67,8 +67,10 @@ public class CalibrationState : BaseState
 
 	private CameraState m_cameraState;
 
-	public static PosePack xPosePack;
-	public static PosePack yPosePack;
+	private PosePack m_xPosePack;
+	private PosePack m_yPosePack;
+
+	private GameObject m_havrocPlayer;
 	
 	void Start () 
 	{
@@ -86,6 +88,8 @@ public class CalibrationState : BaseState
 		
 		m_endCameraTransform = transform.Find ("Calibration View");
 		m_fightCameraTransform = (GameObject.Find ("Fight View")).transform;
+
+		m_havrocPlayer = GameObject.Find ("Havroc Player");
 	}
 
 	override protected void Setup()
@@ -149,9 +153,9 @@ public class CalibrationState : BaseState
 			}
 		}
 
-		if(xPosePack != null)
+		if(m_xPosePack != null)
 		{
-			RestorePose(xPosePack);
+			RestorePose(m_xPosePack);
 		}
 
 		m_oculusParent = m_oculusCamera.transform.parent;
@@ -162,6 +166,16 @@ public class CalibrationState : BaseState
 
 	override protected void UpdateState() 
 	{
+		if(Input.GetButtonDown("Reset"))
+		{
+			int state = (int) m_cameraState;
+			state++;
+			if(state < 4)
+			{
+				m_cameraState = (CameraState) state;
+			}
+		}
+
 		if(m_cameraState == CameraState.Still)
 		{
 			int incompleteJoints = minCalibrationCompletions;
@@ -245,12 +259,25 @@ public class CalibrationState : BaseState
 			m_leftShoulder.Waiting 	= m_leftShoulder.Initializer.Waiting;
 			m_leftElbow.Waiting 	= m_leftElbow.Initializer.Waiting;
 
+			if(m_rightShoulder.Initializer.CurrentPose == CalibrationPose.X ||
+			   m_rightElbow.Initializer.CurrentPose    == CalibrationPose.X ||
+			   m_leftShoulder.Initializer.CurrentPose  == CalibrationPose.X ||
+			   m_leftElbow.Initializer.CurrentPose     == CalibrationPose.X)
+			{
+				m_xPosePack = SavePose(m_havrocPlayer);
+			}
+			else if(m_rightShoulder.Initializer.CurrentPose == CalibrationPose.Y ||
+			        m_rightElbow.Initializer.CurrentPose    == CalibrationPose.Y ||
+			        m_leftShoulder.Initializer.CurrentPose  == CalibrationPose.Y ||
+			        m_leftElbow.Initializer.CurrentPose     == CalibrationPose.Y)
+			{
+				m_yPosePack = SavePose(m_havrocPlayer);
+			}
+			
 			if(incompleteJoints <= 0)
 			{
 				m_cameraState = CameraState.Towards;
 			}
-
-			m_rightShoulder.Initializer.Update(0, 0, 0, 0); // HAAACK
 		}
 		else if(m_cameraState == CameraState.Away)
 		{
@@ -290,7 +317,7 @@ public class CalibrationState : BaseState
 		}
 	}
 
-	public static PosePack SavePose(GameObject obj)
+	private PosePack SavePose(GameObject obj)
 	{
 		PosePack package = new PosePack ();
 
@@ -306,7 +333,7 @@ public class CalibrationState : BaseState
 		return package;
 	}
 
-	public static void RestorePose(PosePack package)
+	private void RestorePose(PosePack package)
 	{
 		foreach(KeyValuePair<Transform, Vector3> entry in package.Positions)
 		{

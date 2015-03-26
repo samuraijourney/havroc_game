@@ -14,9 +14,9 @@ public class ElbowFPSDisplay : MonoBehaviour
 		m_textMesh = GetComponent<TextMesh> ();
 		m_fpsMonitor = new FPSMonitor (4.0f);
 		
-		m_callback = new HVR_Tracking.ElbowCallback(OnElbowEvent);
+		//m_callback = new HVR_Tracking.ElbowCallback(OnElbowEvent);
 
-		HVR_Tracking.RegisterElbowCallback(m_callback);
+		//HVR_Tracking.RegisterElbowCallback(m_callback);
 	}
 
 	void Update () 

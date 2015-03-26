@@ -7,7 +7,7 @@ public class IMUInitializer
 	private int m_yPoseIterations = 0;
 
 	private IMUCalibrator m_calibrator;
-	private CalibrationPose m_currentPose = CalibrationPose.X;
+	private CalibrationPose m_currentPose = CalibrationPose.None;
 
 	private int m_calibrationDuration = 100;
 
@@ -41,6 +41,11 @@ public class IMUInitializer
 	
 	public void Update(float w, float x, float y, float z)
 	{
+		if(m_currentPose == CalibrationPose.None)
+		{
+			m_currentPose = CalibrationPose.X;
+		}
+
 		if(m_syncLastDateTime)
 		{
 			m_lastDatetime = DateTime.Now;
@@ -67,11 +72,6 @@ public class IMUInitializer
 
 				m_calibrator.Update(CalibrationPose.X, w, x, y, z);
 				m_xPoseIterations++;
-
-				if(CalibrationState.xPosePack == null)
-				{
-					CalibrationState.xPosePack = CalibrationState.SavePose(GameObject.Find ("Havroc Player"));
-				}
 				
 				if(m_xPoseIterations == m_calibrationDuration)
 				{
@@ -85,11 +85,6 @@ public class IMUInitializer
 			{
 				m_calibrator.Update(CalibrationPose.Y, w, x, y, z);
 				m_yPoseIterations++;
-
-				if(CalibrationState.yPosePack == null)
-				{
-					CalibrationState.yPosePack = CalibrationState.SavePose(GameObject.Find ("Havroc Player"));
-				}
 
 				if(m_yPoseIterations == m_calibrationDuration)
 				{
