@@ -148,18 +148,10 @@ public class SoundManager : MonoBehaviour, IIntroStateMember, IFightStateMember,
 	
 	public void OnStateFightWin(PlayerType type)
 	{
-		if(type == PlayerType.Havroc)
-		{
-			PlayExcellent();
-		}
 	}
 	
 	public void OnStateFightLose(PlayerType type)
 	{
-		if(type == PlayerType.Havroc)
-		{
-			PlayFatality();
-		}
 	}
 	
 	public void OnStateFightTimeout()

@@ -14,7 +14,6 @@ public class TextSwiper : MonoBehaviour, IIntroStateMember
 	private Vector3 m_localStopPosition = new Vector3(-0.25f,0,0);
 
 	private string[] m_texts = new string[]{};
-	private float[] m_delays = new float[]{};
 
 	private float m_timePercentageToMid = 0.2f;
 	private float m_timePercentageAtMid = 0.6f;
@@ -75,14 +74,21 @@ public class TextSwiper : MonoBehaviour, IIntroStateMember
 			else if(m_swipeState == SwipeState.Finished)
 			{
 				m_currentIndex++;
-				m_swipeState = SwipeState.ToMid;
-				m_textMesh.text = m_texts[m_currentIndex];
 
 				if(m_currentIndex == m_texts.Length)
 				{
 					m_enabled = false;
 					m_currentIndex = 0;
+					
+					DestroySwiper();
 				}
+				else
+				{
+					m_swipeState = SwipeState.ToMid;
+					m_textMesh.text = m_texts[m_currentIndex];
+				}
+
+				//Debug.Log ("In Finished State Index:" + m_currentIndex + " Length:" + m_texts.Length);
 			}
 
 			m_textTransform.localPosition = new Vector3(m_xTranslation,0,0);
@@ -101,24 +107,31 @@ public class TextSwiper : MonoBehaviour, IIntroStateMember
 
 	private void DestroySwiper()
 	{
-		GameObject.Destroy (m_swiper);
+		if(m_swiper != null)
+		{
+			GameObject.Destroy (m_swiper);
+		}
 	}
 
-	public void SetPhrase(string[] text, float[] delays)
+	public void SetPhrase(string[] text)
 	{
 		m_texts = text;
-		m_delays = delays;
+	}
+
+	public void StartSwiper()
+	{
+		CreateSwiper();
+		m_swipeState = SwipeState.ToMid;
+		m_currentIndex = 0;
+		m_textMesh.text = m_texts[m_currentIndex];
+		m_enabled = true;
 	}
 	
 	public void OnStateBaseStart(GameState state)
 	{
 		if(state == GameState.Intro)
 		{
-			CreateSwiper();
-			m_swipeState = SwipeState.ToMid;
-			m_currentIndex = 0;
-			m_textMesh.text = m_texts[m_currentIndex];
-			m_enabled = true;
+			StartSwiper();
 		}
 	}
 	

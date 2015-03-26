@@ -58,6 +58,11 @@ public class GameManager : MonoBehaviour
 	void Update () 
 	{
 		CurrentGameState = gameState;
+
+		if(Input.GetButton("Reset1") && Input.GetButton("Reset2"))
+		{
+			CurrentGameState = GameState.Calibration;
+		}
 	}
 
 	public GameState CurrentGameState

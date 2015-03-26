@@ -17,11 +17,9 @@ public class IntroState : BaseState
 		SoundManager.Instance.PlayTheme(duration);
 
 		string[] swipeTexts = new string[]{"Round 1","Fight!"};
-		float[] swipeDelays = new float[]{0.5f,0.3f};
 
 		TextSwiper swiper = GameObject.Find ("Swiper").GetComponent<TextSwiper>();
-		swiper.SetPhrase (swipeTexts,swipeDelays);
-
+		swiper.SetPhrase (swipeTexts);
 	}
 	
 	override protected void UpdateState() 

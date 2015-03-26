@@ -59,6 +59,21 @@ public class FightState : BaseState
 			}
 		}
 
+		TextSwiper swiper = GameObject.Find ("Swiper").GetComponent<TextSwiper>();
+
+		if(type == PlayerType.Havroc)
+		{
+			swiper.SetPhrase (new string[]{"Fatality"});
+			swiper.StartSwiper();
+			SoundManager.Instance.PlayFatality();
+		}
+		else if(type == PlayerType.Enemy)
+		{
+			swiper.SetPhrase (new string[]{"Excellent"});
+			swiper.StartSwiper();
+			SoundManager.Instance.PlayExcellent();
+		}
+
 		IsComplete = true;
 	}
 
