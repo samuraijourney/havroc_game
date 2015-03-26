@@ -3,8 +3,8 @@ using System.Collections;
 
 public enum GameState
 {
-	Intro 		= 0,
-	Calibration = 1,
+	Calibration = 0,
+	Intro 		= 1,
 	Fight 		= 2,
 	End 		= 3,
 	None		= 4
@@ -39,13 +39,13 @@ public class GameManager : MonoBehaviour
 
 	void Awake()
 	{
-		IntroState 		 introState 	  = GameObject.Find("Intro State").GetComponent<IntroState>();
 		CalibrationState calibrationState = GameObject.Find("Calibration State").GetComponent<CalibrationState>();
+		IntroState 		 introState 	  = GameObject.Find("Intro State").GetComponent<IntroState>();
 		FightState 		 fightState 	  = GameObject.Find("Fight State").GetComponent<FightState>();
 		EndState 		 endState 		  = GameObject.Find("End State").GetComponent<EndState>();
 
-		introState.OnGameStateCompleteEvent 	  += OnGameStateComplete;
 		calibrationState.OnGameStateCompleteEvent += OnGameStateComplete;
+		introState.OnGameStateCompleteEvent 	  += OnGameStateComplete;
 		fightState.OnGameStateCompleteEvent 	  += OnGameStateComplete;
 		endState.OnGameStateCompleteEvent 		  += OnGameStateComplete;
 	}

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class TimerMonitor : MonoBehaviour, IFightStateMember
+public class TimerMonitor : MonoBehaviour, IBaseStateMember
 {
 	public int startTime = 90;
 
@@ -17,6 +17,9 @@ public class TimerMonitor : MonoBehaviour, IFightStateMember
 	private bool m_isOriginalColor = true;
 
 	private bool m_enabled = false;
+
+	public delegate void TimeoutCallback();
+	public event TimeoutCallback OnTimeoutEvent;
 
 	// Use this for initialization
 	void Start () 
@@ -69,6 +72,13 @@ public class TimerMonitor : MonoBehaviour, IFightStateMember
 			else
 			{
 				m_textMesh.color = m_textColor;
+
+				if(OnTimeoutEvent != null)
+				{
+					OnTimeoutEvent();
+					Debug.Log ("Timeout event called");
+					m_enabled = false;
+				}
 			}
 		}
 	}

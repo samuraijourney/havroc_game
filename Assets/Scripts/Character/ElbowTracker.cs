@@ -26,7 +26,7 @@ public class ElbowTracker : MonoBehaviour, ICalibrationStateMember
 	private HVR_Tracking.ElbowCallback m_callback;
 	
 	private IMUCalibrator m_calibrator;
-	private CalibrationPose m_currentPose;
+	private CalibrationPose m_currentPose = CalibrationPose.None;
 	
 	private Vector3 m_lastRotation;
 	
@@ -45,8 +45,12 @@ public class ElbowTracker : MonoBehaviour, ICalibrationStateMember
 	{
 		if(m_trackingOn)
 		{
-			m_calibrator.Sign = rotationSign;
-			m_calibrator.ComputeRotation(w, x, y, z, rotation, transform);
+			if(m_calibrator != null)
+			{
+				m_calibrator.Sign = rotationSign;
+				
+				m_calibrator.ComputeRotation(w, x, y, z, rotation, transform);
+			}
 		}
 		else if(m_calibrating)
 		{

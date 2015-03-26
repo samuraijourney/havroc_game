@@ -1,9 +1,11 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections;
 
-public class HavrocController : MonoBehaviour {
+public class HavrocController : MonoBehaviour, IFightStateMember {
 
 	public float damagePerHit = 1.0f;
+	public float blockingReduction = 10.0f;
 	public float animSpeed = 1.0f;
 
 	private bool lose = false;
@@ -31,7 +33,9 @@ public class HavrocController : MonoBehaviour {
 		m_anim = GetComponent<Animator>();
 		m_enemyController = GameObject.Find ("Enemy Player").GetComponent<EnemyController> ();
 		m_healthBar = GameObject.Find ("Health Bar Havroc");
-		m_enemy = GameObject.Find("Enemy Player").transform;	
+		m_enemy = GameObject.Find("Enemy Player").transform;
+
+		//m_anim.enabled = false;
 	}
 
 	void FixedUpdate()
@@ -91,7 +95,7 @@ public class HavrocController : MonoBehaviour {
 		{
 			if(m_pass)
 			{
-				m_healthBar.SendMessage("ApplyDamage", damagePerHit);
+				m_healthBar.SendMessage("ApplyDamage", IsArmMotorNode(data.motorIndex) ? damagePerHit / blockingReduction : damagePerHit);
 				m_pass = false;
 
 				Debug.Log("Damage: " + damagePerHit);
@@ -106,17 +110,47 @@ public class HavrocController : MonoBehaviour {
 
 		m_isAttacking = IsArmMotorNode(data.motorIndex);
 
-		Vector3 vel = data.collision.relativeVelocity;
 		//Debug.Log ("Motor " + data.motorIndex + " Hit");
 	}
 
-	void Lose()
+	public void OnStateFightLose(PlayerType type)
 	{
-		lose = true;
+		if(type == PlayerType.Havroc)
+		{
+			lose = true;
+			win = false;
+		}
+	}
+	
+	public void OnStateFightWin(PlayerType type)
+	{
+		if(type == PlayerType.Havroc)
+		{
+			lose = false;
+			win = true;
+		}
 	}
 
-	void Win()
+	public void OnStateFightTimeout()
 	{
-		win = true;
+	}
+
+	public void OnStateBaseStart(GameState state)
+	{
+		if(state == GameState.Fight)
+		{
+			win = false;
+			lose = false;
+
+			m_anim.enabled = true;
+		}
+	}
+	
+	public void OnStateBaseEnd(GameState state)
+	{
+		if(state == GameState.Fight)
+		{
+			//m_anim.enabled = false; // Change this to end state to give some time for death anim to end
+		}
 	}
 }

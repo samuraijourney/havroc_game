@@ -256,7 +256,7 @@ public class CalibrationState : BaseState
 			}
 		}
 	}
-	
+
 	private void OnElbowEvent(float e_w, float e_x, float e_y, float e_z, byte side)
 	{
 		if((Arm)side == Arm.Right)

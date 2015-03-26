@@ -3,10 +3,12 @@ using System.Collections;
 
 // Require these components when using this script
 [RequireComponent(typeof (Animator))]
-public class EnemyController : MonoBehaviour
+public class EnemyController : MonoBehaviour, IFightStateMember
 {
 	public float animSpeed = 1.0f;						// a public setting for overall animator animation speed
 	public float damagePerHit = 1.0f;
+	public float blockingReduction = 10.0f;
+	public float maxDistance = 10.0f;
 
 	private bool lose = false;
 	private bool win = false;
@@ -93,17 +95,18 @@ public class EnemyController : MonoBehaviour
 			AnimateKnockdown(false);
 		}
 
-		/*else if (currentBaseState.nameHash == winState)
+		else if (!win && currentBaseState.nameHash == winState)
 		{
 			AnimateWin(false);
 		}
-		
-		else if (currentBaseState.nameHash == knockoutState)
+
+		else if (!lose && currentBaseState.nameHash == knockoutState)
 		{
 			AnimateLose(false);
-		}*/
-
+		}
+		
 		transform.LookAt (enemy.position);
+		transform.position = enemy.position + Vector3.ClampMagnitude(transform.position - enemy.position, maxDistance);
 	}
 
 	private void AnimateBlock(bool on)
@@ -172,17 +175,42 @@ public class EnemyController : MonoBehaviour
 	{
 		if (havrocController.IsAttacking)
 		{
-			healthBar.SendMessage("ApplyDamage", damagePerHit);
+			healthBar.SendMessage("ApplyDamage", currentBaseState.nameHash == blockState ? damagePerHit / blockingReduction : damagePerHit);
 		}
 	}
 
-	void Lose()
+	public void OnStateFightLose(PlayerType type)
 	{
-		lose = true;
+		if(type == PlayerType.Enemy)
+		{
+			lose = true;
+			win = false;
+		}
 	}
 
-	void Win()
+	public void OnStateFightWin(PlayerType type)
 	{
-		win = true;
+		if(type == PlayerType.Enemy)
+		{
+			lose = false;
+			win = true;
+		}
+	}
+
+	public void OnStateFightTimeout()
+	{
+	}
+
+	public void OnStateBaseStart(GameState state)
+	{
+		if(state == GameState.Fight)
+		{
+			win = false;
+			lose = false;
+		}
+	}
+	
+	public void OnStateBaseEnd(GameState state)
+	{
 	}
 }

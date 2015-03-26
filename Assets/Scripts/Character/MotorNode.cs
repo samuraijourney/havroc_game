@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections;
 
 public class CollisionData
@@ -16,6 +17,10 @@ public class MotorNode : MonoBehaviour
 
 	private Color m_original_color;
 	private GameObject m_havrocPlayer;
+
+	private float m_maxDamage = 5.0f;
+	private float m_motorMinIntensity = 150.0f;
+	private float m_motorMaxIntensity = 255.0f;
 
 	// Use this for initialization
 	void Start () 
@@ -57,6 +62,22 @@ public class MotorNode : MonoBehaviour
 			{
 				Destroy (col.gameObject);
 			}
+
+			byte[] motorIndexArr = new byte[]{(byte)motorIndex};
+			byte[] motorIntensityArr = new byte[]{ComputeMotorIntensity(col)};
+			HVR_Network.SendMotorCommand(motorIndexArr,motorIntensityArr,1);
 		}
+	}
+
+	private byte ComputeMotorIntensity(Collision col)
+	{
+		float intensity = 0;
+
+		float scale = (m_motorMaxIntensity - m_motorMinIntensity) / m_maxDamage;
+
+		intensity *= scale;
+		intensity += m_motorMinIntensity;
+
+		return Convert.ToByte(intensity);
 	}
 }

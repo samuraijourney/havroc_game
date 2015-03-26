@@ -1,12 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class HealthMonitor : MonoBehaviour 
+public class HealthMonitor : MonoBehaviour, IFightStateMember
 {
 	public float maxHealth = 100f;
 	public float health = 100f;
-	public Transform player;
-	public Transform enemy;
+	public PlayerType playerType;
 
 	private float m_scaleMax = 1.33f;
 	private float m_scaleMin = 0.0f;
@@ -15,6 +14,12 @@ public class HealthMonitor : MonoBehaviour
 	private Transform m_healthBarTransform;
 	private Transform m_deadXTransform;
 	private TextMesh m_healthText;
+
+	public delegate void KnockoutCallback(PlayerType type);
+	public event KnockoutCallback OnKnockoutEvent;
+
+	private bool m_enabled = false;
+	private bool m_destroy = false;
 
 	// Use this for initialization
 	void Start () 
@@ -30,33 +35,78 @@ public class HealthMonitor : MonoBehaviour
 	// Update is called once per frame
 	void Update () 
 	{
-		float scaledHealth = health / maxHealth;
-		m_healthText.text = (int)(scaledHealth*100.0f) + "%";
-		
-		float scale = (m_scaleMax - m_scaleMin) * scaledHealth + m_scaleMin;
-		float r = 1.0f - scaledHealth;
-		float g = scaledHealth;
-		float b = 0;
-		
-		m_scalarTransform.localScale = new Vector3 (scale, m_scalarTransform.localScale.y, m_scalarTransform.localScale.z);
-		m_healthBarTransform.GetComponent<Renderer>().material.color = new Color (r,g,b);
-		
-		if (health < 1.0f) 
+		if(m_enabled)
 		{
-			m_deadXTransform.GetComponent<Renderer>().material.color = Color.red;
+			if(m_destroy)
+			{
+				health--;
+			}
 
-			player.SendMessage("Lose");
-			enemy.SendMessage("Win");
-		} 
-		else 
-		{
-			m_deadXTransform.GetComponent<Renderer>().material.color = Color.clear;
+			float scaledHealth = health / maxHealth;
+			m_healthText.text = (int)(scaledHealth*100.0f) + "%";
+			
+			float scale = (m_scaleMax - m_scaleMin) * scaledHealth + m_scaleMin;
+			float r = 1.0f - scaledHealth;
+			float g = scaledHealth;
+			float b = 0;
+			
+			m_scalarTransform.localScale = new Vector3 (scale, m_scalarTransform.localScale.y, m_scalarTransform.localScale.z);
+			m_healthBarTransform.GetComponent<Renderer>().material.color = new Color (r,g,b);
+			
+			if (health < 1.0f) 
+			{
+				m_deadXTransform.GetComponent<Renderer>().material.color = Color.red;
+				
+				if(OnKnockoutEvent != null)
+				{
+					OnKnockoutEvent(playerType);
+				}
+			} 
+			else 
+			{
+				m_deadXTransform.GetComponent<Renderer>().material.color = Color.clear;
+			}
 		}
 	}
 
 	void ApplyDamage(float damage)
 	{
-		health -= damage;
-		health = health > 0 ? health : 0;
+		if(!m_destroy)
+		{
+			health -= damage;
+			health = health > 0 ? health : 0;
+		}
+	}
+
+	public void OnStateBaseStart(GameState state)
+	{
+		if(state == GameState.Fight)
+		{
+			health = maxHealth;
+			m_enabled = true;
+		}
+	}
+	
+	public void OnStateBaseEnd(GameState state)
+	{
+		if(state == GameState.Fight)
+		{
+			m_enabled = false;
+			m_destroy = false;
+		}
+	}
+
+	public void OnStateFightWin(PlayerType type)
+	{
+	}
+
+	public void OnStateFightLose(PlayerType type)
+	{
+	}
+
+	public void OnStateFightTimeout()
+	{
+		m_destroy = true;
+		Debug.Log ("HealthMonitor timeout is called");
 	}
 }

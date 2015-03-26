@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class MatchDisplayController : MonoBehaviour, IFightStateMember
+public class MatchDisplayController : MonoBehaviour, IBaseStateMember
 {
 	private GameObject m_ovrCentreAnchor;
 	private float m_distance;

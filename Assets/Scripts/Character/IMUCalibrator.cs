@@ -115,24 +115,16 @@ public class IMUCalibrator
 
 		newTransform.eulerAngles = new Vector3 (0, 0, 0);
 	
-		newTransform.rotation = new Quaternion (x, y, z, w) * 
-								new Quaternion (-0.707107f, 0, 0, 0.707107f) * 
-								new Quaternion (0, 0.707107f, 0, 0.707107f) *
-								new Quaternion (-0.707107f, 0, 0, 0.707107f);
+		newTransform.rotation = new Quaternion (x, y, z, w);// * 
+								//new Quaternion (-0.707107f, 0, 0, 0.707107f) * 
+								//new Quaternion (0, 0.707107f, 0, 0.707107f) *
+								//new Quaternion (-0.707107f, 0, 0, 0.707107f);
 		
-		Step1Rotation = newTransform.eulerAngles;
-		//newTransform.Rotate (new Vector3 (0, -90, 0));
-		//Step2Rotation = newTransform.eulerAngles;
-		//newTransform.Rotate (new Vector3 (90, 0, 0));
-		//Step3Rotation = newTransform.eulerAngles;
-		//newTransform.Rotate (new Vector3 (0, -90, 0));
-		//Step4Rotation = newTransform.eulerAngles;
-
-		float[] quatParams = ConvertIMUQuatToUnityOrder (-newTransform.rotation.y, -newTransform.rotation.x, newTransform.rotation.z, newTransform.rotation.w);
+		Quaternion newQuaternion = new Quaternion (-newTransform.rotation.y, newTransform.rotation.z, -newTransform.rotation.x, newTransform.rotation.w);
 
 		GameObject.Destroy (gameObject);
 
-		return new Quaternion (quatParams [0], quatParams [1], quatParams [2], quatParams [3]);
+		return newQuaternion;
 	}
 
 	public void ComputeRotation(float w, float x, float y, float z, Vector3 rotation, Transform transform)
@@ -147,35 +139,11 @@ public class IMUCalibrator
 		}
 
 		transform.rotation = PreprocessIMUQuaternionData (w, x, y, z) * 
-			Quaternion.Inverse (m_yPosePlayerRotationQuat) *
-			new Quaternion (Mathf.Cos (Mathf.PI / 4), Mathf.Sin (Mathf.PI / 4), 0, 0);
-
-			
-		//Vector3 euler = q1.eulerAngles;
-
-		// From IMU data to axis A
-		//euler.x *= -1;
-		//euler.y *= -1;
-		//euler.z *= -1;
-
-		// Going from axis A to axis B
-		//euler.y -= 90;
-		//euler.z -= 90;
-		//q1 = Quaternion.Euler (euler);
-		//q1 *= Quaternion.Inverse(m_yPosePlayerRotationQuat);  // Subtract quaternions
-		//q1 *= new Quaternion (Mathf.Cos (-Mathf.PI / 4), Mathf.Sin (-Mathf.PI / 4), 0, 0);
-
-		//Quaternion v1 = m_xPosePlayerRotationQuat * Quaternion.Inverse (m_yPosePlayerRotationQuat);
-		//v1 *= new Quaternion (0, 0, -1, 0);
-		//v1 *= m_yPosePlayerRotationQuat * Quaternion.Inverse (m_xPosePlayerRotationQuat);
+							 Quaternion.Inverse (m_yPosePlayerRotationQuat) *
+							 new Quaternion (Mathf.Cos (Mathf.PI / 4), Mathf.Sin (Mathf.PI / 4), 0, 0);
 		    
 		transform.Rotate (rotation);
 	}
-
-	public Vector3 Step1Rotation { get; set; }
-	public Vector3 Step2Rotation { get; set; }
-	public Vector3 Step3Rotation { get; set; }
-	public Vector3 Step4Rotation { get; set; }
 
 	public void Reset()
 	{
@@ -254,18 +222,6 @@ public class IMUCalibrator
 		}
 
 		return -1;
-	}
-
-	private float[] ConvertIMUQuatToUnityOrder(float x, float y, float z, float w)
-	{
-		float[] ret = new float[4];
-
-		ret [0] = x;
-		ret [1] = z;
-		ret [2] = y;
-		ret [3] = w;
-
-		return ret;
 	}
 }
 
