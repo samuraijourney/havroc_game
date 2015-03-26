@@ -34,7 +34,7 @@ public class EndState : BaseState
 			m_oculusCamera.transform.position = Vector3.Lerp (m_oculusCamera.transform.position, m_fightTransform.position, Time.deltaTime);
 			m_oculusCamera.transform.rotation = Quaternion.Lerp (m_oculusCamera.transform.rotation, m_fightTransform.rotation, Time.deltaTime);
 
-			if((m_oculusCamera.transform.position - m_fightTransform.position).magnitude < 0.1)
+			if((m_oculusCamera.transform.position - m_fightTransform.position).magnitude < 0.01)
 			{
 				m_oculusCamera.transform.parent = m_oculusParent;
 

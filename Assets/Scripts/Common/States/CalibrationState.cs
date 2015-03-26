@@ -8,6 +8,8 @@ public enum Joint 			{ Shoulder, Elbow, Wrist, Hip };
 
 public class CalibrationState : BaseState 
 {
+	private enum CameraState { Away, Towards, Still };
+
 	public struct CalibratorPack
 	{
 		public IMUCalibrator Calibrator;
@@ -57,6 +59,14 @@ public class CalibrationState : BaseState
 
 	private ICalibrationStateMember[] m_members;
 
+	private Transform m_endCameraTransform;
+	private Transform m_fightCameraTransform;
+	
+	private GameObject m_oculusCamera;
+	private Transform m_oculusParent;
+
+	private CameraState m_cameraState;
+
 	public static PosePack xPosePack;
 	public static PosePack yPosePack;
 	
@@ -71,6 +81,11 @@ public class CalibrationState : BaseState
 		m_rightElbow    = new CalibratorPack();
 		m_leftShoulder  = new CalibratorPack();
 		m_leftElbow 	= new CalibratorPack();
+
+		m_oculusCamera = GameObject.Find ("OVRPlayerController");
+		
+		m_endCameraTransform = transform.Find ("Calibration View");
+		m_fightCameraTransform = (GameObject.Find ("Fight View")).transform;
 	}
 
 	override protected void Setup()
@@ -138,97 +153,127 @@ public class CalibrationState : BaseState
 		{
 			RestorePose(xPosePack);
 		}
+
+		m_oculusParent = m_oculusCamera.transform.parent;
+		m_oculusCamera.transform.parent = transform;
+
+		m_cameraState = CameraState.Away;
 	}
 
 	override protected void UpdateState() 
 	{
-		int incompleteJoints = minCalibrationCompletions;
-
-		if(m_rightShoulder.Initializer.Complete)
+		if(m_cameraState == CameraState.Still)
 		{
-			if(!m_rightShoulder.Complete)
-			{
-				m_rightShoulder.Member.OnStateCalibrationDone(m_rightShoulder.Calibrator);
+			int incompleteJoints = minCalibrationCompletions;
 
-				m_rightShoulder.Complete = true;
+			if(m_rightShoulder.Initializer.Complete)
+			{
+				if(!m_rightShoulder.Complete)
+				{
+					m_rightShoulder.Member.OnStateCalibrationDone(m_rightShoulder.Calibrator);
+
+					m_rightShoulder.Complete = true;
+				}
+
+				incompleteJoints--;
 			}
-
-			incompleteJoints--;
-		}
-		if(m_rightElbow.Initializer.Complete)
-		{
-			if(!m_rightElbow.Complete)
+			if(m_rightElbow.Initializer.Complete)
 			{
-				m_rightElbow.Member.OnStateCalibrationDone(m_rightElbow.Calibrator);
-				
-				m_rightElbow.Complete = true;
-			}
-
-			incompleteJoints--;
-		}
-		if(m_leftShoulder.Initializer.Complete)
-		{
-			if(!m_leftShoulder.Complete)
-			{
-				m_leftShoulder.Member.OnStateCalibrationDone(m_leftShoulder.Calibrator);
+				if(!m_rightElbow.Complete)
+				{
+					m_rightElbow.Member.OnStateCalibrationDone(m_rightElbow.Calibrator);
 					
-				m_leftShoulder.Complete = true;
-			}
+					m_rightElbow.Complete = true;
+				}
 
-			incompleteJoints--;
-		}
-		if(m_leftElbow.Initializer.Complete)
-		{
-			if(!m_leftElbow.Complete)
+				incompleteJoints--;
+			}
+			if(m_leftShoulder.Initializer.Complete)
 			{
-				m_leftElbow.Member.OnStateCalibrationDone(m_leftElbow.Calibrator);
+				if(!m_leftShoulder.Complete)
+				{
+					m_leftShoulder.Member.OnStateCalibrationDone(m_leftShoulder.Calibrator);
 						
-				m_leftElbow.Complete = true;
+					m_leftShoulder.Complete = true;
+				}
+
+				incompleteJoints--;
+			}
+			if(m_leftElbow.Initializer.Complete)
+			{
+				if(!m_leftElbow.Complete)
+				{
+					m_leftElbow.Member.OnStateCalibrationDone(m_leftElbow.Calibrator);
+							
+					m_leftElbow.Complete = true;
+				}
+
+				incompleteJoints--;
 			}
 
-			incompleteJoints--;
-		}
+			if(!m_rightShoulder.Waiting && m_rightShoulder.Initializer.Waiting)
+			{
+				m_rightShoulder.Member.OnStateCalibrationPoseUpdate(m_rightShoulder.Initializer.CurrentPose);
+			}
+			if(!m_rightElbow.Waiting && m_rightElbow.Initializer.Waiting)
+			{
+				m_rightElbow.Member.OnStateCalibrationPoseUpdate(m_rightElbow.Initializer.CurrentPose);
+			}
+			if(!m_leftShoulder.Waiting && m_leftShoulder.Initializer.Waiting)
+			{
+				m_leftShoulder.Member.OnStateCalibrationPoseUpdate(m_leftShoulder.Initializer.CurrentPose);
+			}
+			if(!m_leftElbow.Waiting && m_leftElbow.Initializer.Waiting)
+			{
+				m_leftElbow.Member.OnStateCalibrationPoseUpdate(m_leftElbow.Initializer.CurrentPose);
+			}
 
-		if(!m_rightShoulder.Waiting && m_rightShoulder.Initializer.Waiting)
-		{
-			m_rightShoulder.Member.OnStateCalibrationPoseUpdate(m_rightShoulder.Initializer.CurrentPose);
-		}
-		if(!m_rightElbow.Waiting && m_rightElbow.Initializer.Waiting)
-		{
-			m_rightElbow.Member.OnStateCalibrationPoseUpdate(m_rightElbow.Initializer.CurrentPose);
-		}
-		if(!m_leftShoulder.Waiting && m_leftShoulder.Initializer.Waiting)
-		{
-			m_leftShoulder.Member.OnStateCalibrationPoseUpdate(m_leftShoulder.Initializer.CurrentPose);
-		}
-		if(!m_leftElbow.Waiting && m_leftElbow.Initializer.Waiting)
-		{
-			m_leftElbow.Member.OnStateCalibrationPoseUpdate(m_leftElbow.Initializer.CurrentPose);
-		}
+			rightShoulderXPosePlayerRotation = m_rightShoulder.Calibrator.PlayerXPose;
+			rightShoulderYPosePlayerRotation = m_rightShoulder.Calibrator.PlayerYPose;
+			
+			rightElbowXPosePlayerRotation = m_rightElbow.Calibrator.PlayerXPose;
+			rightElbowYPosePlayerRotation = m_rightElbow.Calibrator.PlayerYPose;
+			
+			leftShoulderXPosePlayerRotation = m_leftShoulder.Calibrator.PlayerXPose;
+			leftShoulderYPosePlayerRotation = m_leftShoulder.Calibrator.PlayerYPose;
+			
+			leftElbowXPosePlayerRotation = m_leftElbow.Calibrator.PlayerXPose;
+			leftElbowYPosePlayerRotation = m_leftElbow.Calibrator.PlayerYPose;
 
-		rightShoulderXPosePlayerRotation = m_rightShoulder.Calibrator.PlayerXPose;
-		rightShoulderYPosePlayerRotation = m_rightShoulder.Calibrator.PlayerYPose;
-		
-		rightElbowXPosePlayerRotation = m_rightElbow.Calibrator.PlayerXPose;
-		rightElbowYPosePlayerRotation = m_rightElbow.Calibrator.PlayerYPose;
-		
-		leftShoulderXPosePlayerRotation = m_leftShoulder.Calibrator.PlayerXPose;
-		leftShoulderYPosePlayerRotation = m_leftShoulder.Calibrator.PlayerYPose;
-		
-		leftElbowXPosePlayerRotation = m_leftElbow.Calibrator.PlayerXPose;
-		leftElbowYPosePlayerRotation = m_leftElbow.Calibrator.PlayerYPose;
+			m_rightShoulder.Waiting = m_rightShoulder.Initializer.Waiting;
+			m_rightElbow.Waiting 	= m_rightElbow.Initializer.Waiting;
+			m_leftShoulder.Waiting 	= m_leftShoulder.Initializer.Waiting;
+			m_leftElbow.Waiting 	= m_leftElbow.Initializer.Waiting;
 
-		m_rightShoulder.Waiting = m_rightShoulder.Initializer.Waiting;
-		m_rightElbow.Waiting 	= m_rightElbow.Initializer.Waiting;
-		m_leftShoulder.Waiting 	= m_leftShoulder.Initializer.Waiting;
-		m_leftElbow.Waiting 	= m_leftElbow.Initializer.Waiting;
+			if(incompleteJoints <= 0)
+			{
+				m_cameraState = CameraState.Towards;
+			}
 
-		if(incompleteJoints <= 0)
-		{
-			IsComplete = true;
+			m_rightShoulder.Initializer.Update(0, 0, 0, 0); // HAAACK
 		}
+		else if(m_cameraState == CameraState.Away)
+		{
+			m_oculusCamera.transform.position = Vector3.Lerp (m_oculusCamera.transform.position, m_endCameraTransform.position, Time.deltaTime);
+			m_oculusCamera.transform.rotation = Quaternion.Lerp (m_oculusCamera.transform.rotation, m_endCameraTransform.rotation, Time.deltaTime);
 
-		m_rightShoulder.Initializer.Update(0, 0, 0, 0); // HAAACK
+			if((m_oculusCamera.transform.position - m_endCameraTransform.position).magnitude < 0.01)
+			{
+				m_cameraState = CameraState.Still;
+			}
+		}
+		else if(m_cameraState == CameraState.Towards)
+		{
+			m_oculusCamera.transform.position = Vector3.Lerp (m_oculusCamera.transform.position, m_fightCameraTransform.position, Time.deltaTime);
+			m_oculusCamera.transform.rotation = Quaternion.Lerp (m_oculusCamera.transform.rotation, m_fightCameraTransform.rotation, Time.deltaTime);
+			
+			if((m_oculusCamera.transform.position - m_fightCameraTransform.position).magnitude < 0.01)
+			{
+				m_oculusCamera.transform.parent = m_oculusParent;
+				
+				IsComplete = true;
+			}
+		}
 	}
 
 	override protected void Clean()
