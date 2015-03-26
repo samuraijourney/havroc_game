@@ -59,7 +59,7 @@ public class GameManager : MonoBehaviour
 	{
 		gameState = CurrentGameState;
 
-		if(Input.GetButtonDown("Reset"))
+		if(Input.GetButtonDown("Force Skip"))
 		{
 			OnGameStateComplete(CurrentGameState);
 		}

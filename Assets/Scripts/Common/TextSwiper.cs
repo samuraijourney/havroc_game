@@ -15,16 +15,14 @@ public class TextSwiper : MonoBehaviour, IIntroStateMember
 
 	private string[] m_texts = new string[]{};
 
-	private float m_timePercentageToMid = 0.2f;
-	private float m_timePercentageAtMid = 0.6f;
-	private float m_timePercentageToEnd = 0.2f;
-
 	private int m_currentIndex = 0;
 
 	private bool m_enabled = false;
 
 	private SwipeState m_swipeState = SwipeState.ToMid;
 	private GameObject m_swiper;
+
+	private Color m_backgroundColor;
 
 	// Use this for initialization
 	void Start () 
