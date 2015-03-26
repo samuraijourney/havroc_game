@@ -4,18 +4,26 @@ public class IMUCalibrator
 {
 	private Vector3 m_poseScales;
 	private Vector3 m_poseIterations;
+
+	private Vector3 m_poseSign;
 	
-	private Vector3 m_xPoseCharacterRotation;
-	private Vector3 m_yPoseCharacterRotation;
-	private Vector3 m_zPoseCharacterRotation;
+	private Vector4 m_xPoseCharacterRotation;
+	private Vector4 m_yPoseCharacterRotation;
+	private Vector4 m_zPoseCharacterRotation;
 	
-	private Vector3 m_xPosePlayerRotationAccum;
-	private Vector3 m_yPosePlayerRotationAccum;
-	private Vector3 m_zPosePlayerRotationAccum;
+	private Vector4 m_xPosePlayerRotationAccum;
+	private Vector4 m_yPosePlayerRotationAccum;
+	private Vector4 m_zPosePlayerRotationAccum;
 	
-	private Vector3 m_xPosePlayerRotationAvg;
-	private Vector3 m_yPosePlayerRotationAvg;
-	private Vector3 m_zPosePlayerRotationAvg;
+	private Vector4 m_xPosePlayerRotationAvg;
+	private Vector4 m_yPosePlayerRotationAvg;
+	private Vector4 m_zPosePlayerRotationAvg;
+
+	private Quaternion m_xPosePlayerRotationQuat;
+	private Quaternion m_yPosePlayerRotationQuat;
+	private Quaternion m_zPosePlayerRotationQuat;
+
+	private bool m_globalQuaternionsInitialized = false;
 	
 	public IMUCalibrator(Vector3 xPoseCharacterRotation,
 	                     Vector3 yPoseCharacterRotation,
@@ -25,75 +33,149 @@ public class IMUCalibrator
 		m_yPoseCharacterRotation = yPoseCharacterRotation;
 		m_zPoseCharacterRotation = zPoseCharacterRotation;
 		
-		m_xPosePlayerRotationAccum = new Vector3(0,0,0);
-		m_yPosePlayerRotationAccum = new Vector3(0,0,0);
-		m_zPosePlayerRotationAccum = new Vector3(0,0,0);
+		m_xPosePlayerRotationAccum = new Vector4(0,0,0);
+		m_yPosePlayerRotationAccum = new Vector4(0,0,0);
+		m_zPosePlayerRotationAccum = new Vector4(0,0,0);
 		
-		m_xPosePlayerRotationAvg = new Vector3(0,0,0);
-		m_yPosePlayerRotationAvg = new Vector3(0,0,0);
-		m_zPosePlayerRotationAvg = new Vector3(0,0,0);
+		m_xPosePlayerRotationAvg = new Vector4(0,0,0);
+		m_yPosePlayerRotationAvg = new Vector4(0,0,0);
+		m_zPosePlayerRotationAvg = new Vector4(0,0,0);
 
 		m_poseScales = new Vector3(0,0,0);
 		m_poseIterations = new Vector3(0,0,0);
+
+		m_poseSign = new Vector3(1,1,1);
 	}
 	
-	public void Update(CalibrationPose pose, float xRotation, float yRotation, float zRotation)
+	public void Update(CalibrationPose pose, float w, float x, float y, float z)
 	{
 		switch(pose)
 		{
 			case CalibrationPose.X:
 			{
-				m_xPosePlayerRotationAccum.x += xRotation;
-				m_xPosePlayerRotationAccum.y += yRotation;
-				m_xPosePlayerRotationAccum.z += zRotation;
+				m_xPosePlayerRotationAccum.x += x;
+				m_xPosePlayerRotationAccum.y += y;
+				m_xPosePlayerRotationAccum.z += z;
+				m_xPosePlayerRotationAccum.w += w;
 				
 				m_poseIterations.x++;
 				
 				m_xPosePlayerRotationAvg.x = m_xPosePlayerRotationAccum.x / m_poseIterations.x;
 				m_xPosePlayerRotationAvg.y = m_xPosePlayerRotationAccum.y / m_poseIterations.x;
 				m_xPosePlayerRotationAvg.z = m_xPosePlayerRotationAccum.z / m_poseIterations.x;
-				
+				m_xPosePlayerRotationAvg.w = m_xPosePlayerRotationAccum.w / m_poseIterations.x;
+
 				break;
 			}
 			case CalibrationPose.Y:
 			{
-				m_yPosePlayerRotationAccum.x += xRotation;
-				m_yPosePlayerRotationAccum.y += yRotation;
-				m_yPosePlayerRotationAccum.z += zRotation;
+				m_yPosePlayerRotationAccum.x += x;
+				m_yPosePlayerRotationAccum.y += y;
+				m_yPosePlayerRotationAccum.z += z;
+				m_yPosePlayerRotationAccum.w += w;
 				
 				m_poseIterations.y++;
 				
 				m_yPosePlayerRotationAvg.x = m_yPosePlayerRotationAccum.x / m_poseIterations.y;
 				m_yPosePlayerRotationAvg.y = m_yPosePlayerRotationAccum.y / m_poseIterations.y;
 				m_yPosePlayerRotationAvg.z = m_yPosePlayerRotationAccum.z / m_poseIterations.y;
+				m_yPosePlayerRotationAvg.w = m_yPosePlayerRotationAccum.w / m_poseIterations.y;
 				
 				break;
 			}
 			case CalibrationPose.Z:
 			{
-				m_zPosePlayerRotationAccum.x += xRotation;
-				m_zPosePlayerRotationAccum.y += yRotation;
-				m_zPosePlayerRotationAccum.z += zRotation;
+				m_zPosePlayerRotationAccum.x += x;
+				m_zPosePlayerRotationAccum.y += y;
+				m_zPosePlayerRotationAccum.z += z;
+				m_zPosePlayerRotationAccum.w += w;
 				
 				m_poseIterations.z++;
 				
 				m_zPosePlayerRotationAvg.x = m_zPosePlayerRotationAccum.x / m_poseIterations.z;
 				m_zPosePlayerRotationAvg.y = m_zPosePlayerRotationAccum.y / m_poseIterations.z;
 				m_zPosePlayerRotationAvg.z = m_zPosePlayerRotationAccum.z / m_poseIterations.z;
+				m_zPosePlayerRotationAvg.w = m_zPosePlayerRotationAccum.w / m_poseIterations.z;
 				
 				break;
 			}
 		}
-
-		m_poseScales.x = (m_xPoseCharacterRotation.x - m_zPoseCharacterRotation.x) / (m_xPosePlayerRotationAvg.x - m_zPosePlayerRotationAvg.x);
-		m_poseScales.y = (m_yPoseCharacterRotation.y - m_zPoseCharacterRotation.y) / (m_yPosePlayerRotationAvg.y - m_zPosePlayerRotationAvg.y);
-		m_poseScales.z = (m_xPoseCharacterRotation.z - m_yPoseCharacterRotation.z) / (m_xPosePlayerRotationAvg.z - m_yPosePlayerRotationAvg.z);
 	}
 
-	public Vector3 ComputeRotation(float xRotation, float yRotation, float zRotation)
+	private Quaternion PreprocessIMUQuaternionData (Vector4 quatParams)
 	{
-		return new Vector3(xRotation * m_poseScales.x, yRotation * m_poseScales.y, zRotation * m_poseScales.z);
+		return PreprocessIMUQuaternionData (quatParams.w, quatParams.x, quatParams.y, quatParams.z);
 	}
+
+	private Quaternion PreprocessIMUQuaternionData (float w, float x, float y, float z)
+	{
+		GameObject gameObject = new GameObject ();
+
+		Transform newTransform = gameObject.transform;
+
+		newTransform.eulerAngles = new Vector3 (0, 0, 0);
+	
+		newTransform.rotation = new Quaternion (x, y, z, w) * 
+								new Quaternion (-0.707107f, 0, 0, 0.707107f) * 
+								new Quaternion (0, 0.707107f, 0, 0.707107f) *
+								new Quaternion (-0.707107f, 0, 0, 0.707107f);
+		
+		Step1Rotation = newTransform.eulerAngles;
+		//newTransform.Rotate (new Vector3 (0, -90, 0));
+		//Step2Rotation = newTransform.eulerAngles;
+		//newTransform.Rotate (new Vector3 (90, 0, 0));
+		//Step3Rotation = newTransform.eulerAngles;
+		//newTransform.Rotate (new Vector3 (0, -90, 0));
+		//Step4Rotation = newTransform.eulerAngles;
+
+		float[] quatParams = ConvertIMUQuatToUnityOrder (-newTransform.rotation.y, -newTransform.rotation.x, newTransform.rotation.z, newTransform.rotation.w);
+
+		GameObject.Destroy (gameObject);
+
+		return new Quaternion (quatParams [0], quatParams [1], quatParams [2], quatParams [3]);
+	}
+
+	public void ComputeRotation(float w, float x, float y, float z, Vector3 rotation, Transform transform)
+	{
+		if(!m_globalQuaternionsInitialized)
+		{
+			m_xPosePlayerRotationQuat = PreprocessIMUQuaternionData(m_xPosePlayerRotationAvg);
+			m_yPosePlayerRotationQuat = PreprocessIMUQuaternionData(m_yPosePlayerRotationAvg);
+			m_zPosePlayerRotationQuat = PreprocessIMUQuaternionData(m_zPosePlayerRotationAvg);
+
+			m_globalQuaternionsInitialized = true;
+		}
+
+		transform.rotation = PreprocessIMUQuaternionData (w, x, y, z) * 
+			Quaternion.Inverse (m_yPosePlayerRotationQuat) *
+			new Quaternion (Mathf.Cos (Mathf.PI / 4), Mathf.Sin (Mathf.PI / 4), 0, 0);
+
+			
+		//Vector3 euler = q1.eulerAngles;
+
+		// From IMU data to axis A
+		//euler.x *= -1;
+		//euler.y *= -1;
+		//euler.z *= -1;
+
+		// Going from axis A to axis B
+		//euler.y -= 90;
+		//euler.z -= 90;
+		//q1 = Quaternion.Euler (euler);
+		//q1 *= Quaternion.Inverse(m_yPosePlayerRotationQuat);  // Subtract quaternions
+		//q1 *= new Quaternion (Mathf.Cos (-Mathf.PI / 4), Mathf.Sin (-Mathf.PI / 4), 0, 0);
+
+		//Quaternion v1 = m_xPosePlayerRotationQuat * Quaternion.Inverse (m_yPosePlayerRotationQuat);
+		//v1 *= new Quaternion (0, 0, -1, 0);
+		//v1 *= m_yPosePlayerRotationQuat * Quaternion.Inverse (m_xPosePlayerRotationQuat);
+		    
+		transform.Rotate (rotation);
+	}
+
+	public Vector3 Step1Rotation { get; set; }
+	public Vector3 Step2Rotation { get; set; }
+	public Vector3 Step3Rotation { get; set; }
+	public Vector3 Step4Rotation { get; set; }
 
 	public void Reset()
 	{
@@ -107,6 +189,19 @@ public class IMUCalibrator
 		
 		m_poseIterations = new Vector3(0,0,0);
 	}
+
+	public Vector3 Sign 
+	{
+		get
+		{
+			return m_poseSign;
+		}
+		set
+		{
+			m_poseSign = value;
+		}
+	}
+	public Vector3 Rotation { get; set; }
 
 	public Vector3 PlayerPoseScales
 	{
@@ -159,6 +254,18 @@ public class IMUCalibrator
 		}
 
 		return -1;
+	}
+
+	private float[] ConvertIMUQuatToUnityOrder(float x, float y, float z, float w)
+	{
+		float[] ret = new float[4];
+
+		ret [0] = x;
+		ret [1] = z;
+		ret [2] = y;
+		ret [3] = w;
+
+		return ret;
 	}
 }
 

@@ -15,7 +15,7 @@ public class IntroState : BaseState
 	
 	override protected void UpdateState() 
 	{
-		Debug.Log ("IntroState");
+		//Debug.Log ("IntroState");
 	}
 	
 	override protected void Clean()

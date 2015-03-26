@@ -10,10 +10,23 @@ public class ShoulderTracker : MonoBehaviour, ICalibrationStateMember
 	public float yaw   = 0.0f; // Rotation about x
 	public float pitch = 0.0f; // Rotation about z
 	public float roll  = 0.0f; // Rotation about y
+
+	public float w = 0.0f;
+	public float x = 0.0f;
+	public float y = 0.0f;
+	public float z = 0.0f;
+
+	public Vector3 rotationSign = new Vector3(-1,-1,-1);
+	public Vector3 rotation;
 	
 	public Vector3 xPoseGlobalRotation;
 	public Vector3 yPoseGlobalRotation;
 	public Vector3 zPoseGlobalRotation;
+
+	public Vector3 step1Rotation;
+	public Vector3 step2Rotation;
+	public Vector3 step3Rotation;
+	public Vector3 step4Rotation;
 
 	private HVR_Tracking.ShoulderCallback m_callback;
 
@@ -24,6 +37,7 @@ public class ShoulderTracker : MonoBehaviour, ICalibrationStateMember
 
 	private bool m_trackingOn = false;
 	private bool m_calibrating = false;
+
 	private float m_speed = 1.0f;
 
 	// Use this for initialization
@@ -36,7 +50,13 @@ public class ShoulderTracker : MonoBehaviour, ICalibrationStateMember
 	{
 		if(m_trackingOn)
 		{
-			transform.eulerAngles = m_calibrator.ComputeRotation(roll, yaw, pitch);
+			m_calibrator.Sign = rotationSign;
+			m_calibrator.ComputeRotation(w, x, y, z, rotation, transform);
+
+			step1Rotation = m_calibrator.Step1Rotation;
+			step2Rotation = m_calibrator.Step2Rotation;
+			step3Rotation = m_calibrator.Step3Rotation;
+			step4Rotation = m_calibrator.Step4Rotation;
 		}
 		else if(m_calibrating)
 		{
@@ -68,13 +88,20 @@ public class ShoulderTracker : MonoBehaviour, ICalibrationStateMember
 		}
 	}
 
-	public void OnShoulderEvent(float s_yaw, float s_pitch, float s_roll, byte side)
+	public void OnShoulderEvent(float s_w, float s_x, float s_y, float s_z, byte side)
 	{
         if((side == 1 && arm == Arm.Right) || (side == 2 && arm == Arm.Left))
 		{
-			yaw   = s_yaw;
-			pitch = s_pitch;
-			roll  = s_roll;
+			w = s_w;
+			x = s_x;
+			y = s_y;
+			z = s_z;
+
+			Vector3 euler = (new Quaternion(x,y,z,w)).eulerAngles;
+
+			yaw   = euler.z;
+			pitch = euler.y;
+			roll  = euler.x;
 		}
 	}
 
@@ -86,7 +113,7 @@ public class ShoulderTracker : MonoBehaviour, ICalibrationStateMember
 	public void OnStateCalibrationDone(IMUCalibrator calibrator)
 	{
 		m_calibrator = calibrator;
-
+		
 		HVR_Tracking.RegisterShoulderCallback(m_callback);
 
 		m_trackingOn = true;
@@ -95,17 +122,28 @@ public class ShoulderTracker : MonoBehaviour, ICalibrationStateMember
 
 	public void OnStateBaseStart(GameState state)
 	{
-		m_lastRotation = xPoseGlobalRotation;
-
-		HVR_Tracking.UnregisterShoulderCallback(m_callback);
-
-		m_trackingOn = false;
-		m_calibrating = true;
+		if(state == GameState.Calibration)
+		{
+			m_lastRotation = xPoseGlobalRotation;
+			
+			HVR_Tracking.UnregisterShoulderCallback(m_callback);
+			
+			m_trackingOn = false;
+			m_calibrating = true;
+		}
 	}
 
 	public void OnStateBaseEnd(GameState state)
 	{
 
+	}
+
+	public IMUCalibrator Calibrator
+	{
+		get
+		{
+			return m_calibrator;
+		}
 	}
 	
 	public Vector3 GlobalXPosition

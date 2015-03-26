@@ -3,19 +3,21 @@ using System.Collections;
 
 public class FightState : BaseState 
 {
+	TimerMonitor m_timerMonitor;
+
 	void Start () 
 	{
-		SetTimedTransition (timedTransition);
+		m_timerMonitor = GameObject.Find ("Countdown Timer").GetComponent<TimerMonitor>();
 	}
 
 	override protected void Setup()
 	{
-
+		SetTimedTransition (m_timerMonitor.startTime);
 	}
 	
 	override protected void UpdateState() 
 	{
-		Debug.Log ("FightState");
+		//Debug.Log ("FightState");
 
 		IsComplete = complete;
 	}
@@ -23,7 +25,6 @@ public class FightState : BaseState
 	override protected void Clean()
 	{
 		complete = IsComplete;
-		SetTimedTransition (timedTransition);
 	}
 
 	override public GameState State 

@@ -41,7 +41,7 @@ public class IMUInitializer
 		}
 	}
 	
-	public void Update(float xRotation, float yRotation, float zRotation)
+	public void Update(float w, float x, float y, float z)
 	{
 		if(m_syncLastDateTime)
 		{
@@ -67,7 +67,7 @@ public class IMUInitializer
 					m_timerCountdown = m_timerCountdownStart;
 				}
 
-				m_calibrator.Update(CalibrationPose.X, xRotation, yRotation, zRotation);
+				m_calibrator.Update(CalibrationPose.X, w, x, y, z);
 				m_xPoseIterations++;
 				
 				if(m_xPoseIterations == m_calibrationDuration)
@@ -80,7 +80,7 @@ public class IMUInitializer
 			}
 			else if(m_yPoseIterations < m_calibrationDuration)
 			{
-				m_calibrator.Update(CalibrationPose.Y, xRotation, yRotation, zRotation);
+				m_calibrator.Update(CalibrationPose.Y, w, x, y, z);
 				m_yPoseIterations++;
 
 				if(m_yPoseIterations == m_calibrationDuration)
@@ -93,7 +93,7 @@ public class IMUInitializer
 			}
 			else if(m_zPoseIterations < m_calibrationDuration)
 			{
-				m_calibrator.Update(CalibrationPose.Z, xRotation, yRotation, zRotation);
+				m_calibrator.Update(CalibrationPose.Z, w, x, y, z);
 				m_zPoseIterations++;
 
 				if(m_zPoseIterations == m_calibrationDuration)

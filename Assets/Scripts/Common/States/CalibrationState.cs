@@ -1,13 +1,14 @@
 ﻿using UnityEngine;
+using UnityEditor;
 using System.Collections;
 
 public enum CalibrationPose { X, Y, Z, None };
-public enum Arm 			{ Right = 1, Left = 2 };
-public enum Joint 			{ Shoulder, Elbow, Wrist };
+public enum Arm 			{ Right = 1, Left = 2, None = 3 };
+public enum Joint 			{ Shoulder, Elbow, Wrist, Hip };
 
 public class CalibrationState : BaseState 
 {
-	struct CalibratorPack
+	public struct CalibratorPack
 	{
 		public IMUCalibrator Calibrator;
 		public IMUInitializer Initializer;
@@ -15,7 +16,7 @@ public class CalibrationState : BaseState
 		public bool Waiting;
 		public bool Complete;
 	};
-
+	
 	public int   minCalibrationCompletions = 4;
 	public int   calibrationDuration = 100;
 	public float waitTime = 10.0f;
@@ -126,7 +127,7 @@ public class CalibrationState : BaseState
 
 	override protected void UpdateState() 
 	{
-		Debug.Log ("CalibrationState");
+		//Debug.Log ("CalibrationState");
 
 		int incompleteJoints = minCalibrationCompletions;
 
@@ -222,11 +223,6 @@ public class CalibrationState : BaseState
 		{
 			IsComplete = true;
 		}
-
-		OnShoulderEvent (0, 0, 90, (byte)Arm.Right);
-		OnElbowEvent (0, -90, 0, (byte)Arm.Right);
-		OnShoulderEvent (0, 0, 90, (byte)Arm.Left);
-		OnElbowEvent (0, -90, 0, (byte)Arm.Left);
 	}
 
 	override protected void Clean()
@@ -243,38 +239,38 @@ public class CalibrationState : BaseState
 		}
 	}
 
-	private void OnShoulderEvent(float s_yaw, float s_pitch, float s_roll, byte side)
+	private void OnShoulderEvent(float s_w, float s_x, float s_y, float s_z, byte side)
 	{
 		if((Arm)side == Arm.Right)
 		{
 			if(!m_rightShoulder.Initializer.Complete)
 			{
-				m_rightShoulder.Initializer.Update(s_roll, s_yaw, s_pitch);
+				m_rightShoulder.Initializer.Update(s_w, s_x, s_y, s_z);
 			}
 		}
 		else if((Arm)side == Arm.Left)
 		{
 			if(!m_leftShoulder.Initializer.Complete)
 			{
-				m_leftShoulder.Initializer.Update(s_roll, s_yaw, s_pitch);
+				m_leftShoulder.Initializer.Update(s_w, s_x, s_y, s_z);
 			}
 		}
 	}
 	
-	private void OnElbowEvent(float e_yaw, float e_pitch, float e_roll, byte side)
+	private void OnElbowEvent(float e_w, float e_x, float e_y, float e_z, byte side)
 	{
 		if((Arm)side == Arm.Right)
 		{
 			if(!m_rightElbow.Initializer.Complete)
 			{
-				m_rightElbow.Initializer.Update(e_roll, e_yaw, e_pitch);
+				m_rightElbow.Initializer.Update(e_w, e_x, e_y, e_z);
 			}
 		}
 		else if((Arm)side == Arm.Left)
 		{
 			if(!m_leftElbow.Initializer.Complete)
 			{
-				m_leftElbow.Initializer.Update(e_roll, e_yaw, e_pitch);
+				m_leftElbow.Initializer.Update(e_w, e_x, e_y, e_z);
 			}
 		}
 	}

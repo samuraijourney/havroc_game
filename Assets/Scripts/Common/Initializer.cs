@@ -55,27 +55,39 @@ public class Initializer : MonoBehaviour
 		}
 	}
 
+	public float motorSendInterval = 3.0f;
+	private float m_time;
+
 	public void Start () 
 	{
-
+		m_time = motorSendInterval;
 	}
-		
+
 	public void Update () 
     {
-		byte[] indices = new byte[72];
-		byte[] intensities = new byte[72];
-
-		for(int i = 0; i < 72; i++)
+		if(m_time >= motorSendInterval)
 		{
-			indices[i] = (byte)Mathf.FloorToInt(72.0f*UnityEngine.Random.Range(0,1));
-			intensities[i] = (byte)Mathf.FloorToInt(100.0f*UnityEngine.Random.Range(0,1));
+			int motorLength = 2;
+			int motorMaxIndex = 7;
+			
+			byte[] motorIndices = new byte[motorLength];
+			byte[] motorIntensities = new byte[motorLength];
+			
+			for(int i = 0; i < motorLength; i++)
+			{
+				motorIndices[i] = (byte)UnityEngine.Random.Range(0,motorMaxIndex);
+				motorIntensities[i] = 255;
+
+				//Debug.Log ("Sent motor - Index:" + motorIndices[i] + " Intensity:" + motorIntensities[i]);
+			}
+			
+			//HVR_Network.SendMotorCommand(motorIndices, motorIntensities, motorLength);
+
+			m_time -= motorSendInterval;
 		}
-
-		//HVR_Network.SendMotorCommand(indices, intensities, 72);
-
-		for(int i = 0; i < indices.Length; i++)
+		else
 		{
-			//Debug.Log ("Sent motor data for index " + indices [i]);
+			m_time += Time.deltaTime;
 		}
 	}
 

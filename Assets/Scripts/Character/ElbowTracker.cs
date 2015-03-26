@@ -10,6 +10,14 @@ public class ElbowTracker : MonoBehaviour, ICalibrationStateMember
 	public float yaw   = 0.0f; // Rotation about x
 	public float pitch = 0.0f; // Rotation about z
 	public float roll  = 0.0f; // Rotation about y
+
+	public float w = 0.0f;
+	public float x = 0.0f;
+	public float y = 0.0f;
+	public float z = 0.0f;
+
+	public Vector3 rotationSign = new Vector3(-1,-1,-1);
+	public Vector3 rotation;
 	
 	public Vector3 xPoseGlobalRotation;
 	public Vector3 yPoseGlobalRotation;
@@ -23,6 +31,8 @@ public class ElbowTracker : MonoBehaviour, ICalibrationStateMember
 	private Vector3 m_lastRotation;
 	
 	private bool m_trackingOn = false;
+	private bool m_calibrating = false;
+
 	private float m_speed = 1.0f;
 	
 	// Use this for initialization
@@ -35,9 +45,10 @@ public class ElbowTracker : MonoBehaviour, ICalibrationStateMember
 	{
 		if(m_trackingOn)
 		{
-			transform.eulerAngles = m_calibrator.ComputeRotation(roll, yaw, pitch);
+			m_calibrator.Sign = rotationSign;
+			m_calibrator.ComputeRotation(w, x, y, z, rotation, transform);
 		}
-		else
+		else if(m_calibrating)
 		{
 			switch(m_currentPose)
 			{
@@ -67,13 +78,20 @@ public class ElbowTracker : MonoBehaviour, ICalibrationStateMember
 		}
 	}
 	
-	public void OnElbowEvent(float s_yaw, float s_pitch, float s_roll, byte side)
+	public void OnElbowEvent(float s_w, float s_x, float s_y, float s_z, byte side)
 	{
 		if((side == 1 && arm == Arm.Right) || (side == 2 && arm == Arm.Left))
 		{
-			yaw   = s_yaw;
-			pitch = s_pitch;
-			roll  = s_roll;
+			w = s_w;
+			x = s_x;
+			y = s_y;
+			z = s_z;
+			
+			Vector3 euler = (new Quaternion(x,y,z,w)).eulerAngles;
+			
+			yaw   = euler.y;
+			pitch = euler.z;
+			roll  = euler.x;
 		}
 	}
 	
@@ -89,20 +107,33 @@ public class ElbowTracker : MonoBehaviour, ICalibrationStateMember
 		HVR_Tracking.RegisterElbowCallback(m_callback);
 		
 		m_trackingOn = true;
+		m_calibrating = false;
 	}
 	
 	public void OnStateBaseStart(GameState state)
 	{
-		m_lastRotation = xPoseGlobalRotation;
-		
-		HVR_Tracking.UnregisterElbowCallback(m_callback);
-		
-		m_trackingOn = false;
+		if(state == GameState.Calibration)
+		{
+			m_lastRotation = xPoseGlobalRotation;
+			
+			HVR_Tracking.UnregisterElbowCallback(m_callback);
+			
+			m_trackingOn = false;
+			m_calibrating = true;
+		}
 	}
 	
 	public void OnStateBaseEnd(GameState state)
 	{
 		
+	}
+
+	public IMUCalibrator Calibrator
+	{
+		get
+		{
+			return m_calibrator;
+		}
 	}
 	
 	public Vector3 GlobalXPosition
