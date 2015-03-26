@@ -2,46 +2,36 @@ using UnityEngine;
 
 public class IMUCalibrator
 {
-	private Vector3 m_poseScales;
 	private Vector3 m_poseIterations;
 
 	private Vector3 m_poseSign;
 	
 	private Vector4 m_xPoseCharacterRotation;
 	private Vector4 m_yPoseCharacterRotation;
-	private Vector4 m_zPoseCharacterRotation;
 	
 	private Vector4 m_xPosePlayerRotationAccum;
 	private Vector4 m_yPosePlayerRotationAccum;
-	private Vector4 m_zPosePlayerRotationAccum;
 	
 	private Vector4 m_xPosePlayerRotationAvg;
 	private Vector4 m_yPosePlayerRotationAvg;
-	private Vector4 m_zPosePlayerRotationAvg;
 
 	private Quaternion m_xPosePlayerRotationQuat;
 	private Quaternion m_yPosePlayerRotationQuat;
-	private Quaternion m_zPosePlayerRotationQuat;
 
 	private bool m_globalQuaternionsInitialized = false;
 	
 	public IMUCalibrator(Vector3 xPoseCharacterRotation,
-	                     Vector3 yPoseCharacterRotation,
-	                     Vector3 zPoseCharacterRotation)
+	                     Vector3 yPoseCharacterRotation)
 	{
 		m_xPoseCharacterRotation = xPoseCharacterRotation;
 		m_yPoseCharacterRotation = yPoseCharacterRotation;
-		m_zPoseCharacterRotation = zPoseCharacterRotation;
 		
 		m_xPosePlayerRotationAccum = new Vector4(0,0,0);
 		m_yPosePlayerRotationAccum = new Vector4(0,0,0);
-		m_zPosePlayerRotationAccum = new Vector4(0,0,0);
 		
 		m_xPosePlayerRotationAvg = new Vector4(0,0,0);
 		m_yPosePlayerRotationAvg = new Vector4(0,0,0);
-		m_zPosePlayerRotationAvg = new Vector4(0,0,0);
-
-		m_poseScales = new Vector3(0,0,0);
+		
 		m_poseIterations = new Vector3(0,0,0);
 
 		m_poseSign = new Vector3(1,1,1);
@@ -83,22 +73,6 @@ public class IMUCalibrator
 				
 				break;
 			}
-			case CalibrationPose.Z:
-			{
-				m_zPosePlayerRotationAccum.x += x;
-				m_zPosePlayerRotationAccum.y += y;
-				m_zPosePlayerRotationAccum.z += z;
-				m_zPosePlayerRotationAccum.w += w;
-				
-				m_poseIterations.z++;
-				
-				m_zPosePlayerRotationAvg.x = m_zPosePlayerRotationAccum.x / m_poseIterations.z;
-				m_zPosePlayerRotationAvg.y = m_zPosePlayerRotationAccum.y / m_poseIterations.z;
-				m_zPosePlayerRotationAvg.z = m_zPosePlayerRotationAccum.z / m_poseIterations.z;
-				m_zPosePlayerRotationAvg.w = m_zPosePlayerRotationAccum.w / m_poseIterations.z;
-				
-				break;
-			}
 		}
 	}
 
@@ -133,7 +107,6 @@ public class IMUCalibrator
 		{
 			m_xPosePlayerRotationQuat = PreprocessIMUQuaternionData(m_xPosePlayerRotationAvg);
 			m_yPosePlayerRotationQuat = PreprocessIMUQuaternionData(m_yPosePlayerRotationAvg);
-			m_zPosePlayerRotationQuat = PreprocessIMUQuaternionData(m_zPosePlayerRotationAvg);
 
 			m_globalQuaternionsInitialized = true;
 		}
@@ -149,11 +122,9 @@ public class IMUCalibrator
 	{
 		m_xPosePlayerRotationAccum = new Vector3(0,0,0);
 		m_yPosePlayerRotationAccum = new Vector3(0,0,0);
-		m_zPosePlayerRotationAccum = new Vector3(0,0,0);
 		
 		m_xPosePlayerRotationAvg = new Vector3(0,0,0);
 		m_yPosePlayerRotationAvg = new Vector3(0,0,0);
-		m_zPosePlayerRotationAvg = new Vector3(0,0,0);
 		
 		m_poseIterations = new Vector3(0,0,0);
 	}
@@ -171,14 +142,6 @@ public class IMUCalibrator
 	}
 	public Vector3 Rotation { get; set; }
 
-	public Vector3 PlayerPoseScales
-	{
-		get
-		{
-			return m_poseScales;
-		}
-	}
-
 	public Vector3 PlayerXPose
 	{
 		get
@@ -195,14 +158,6 @@ public class IMUCalibrator
 		}
 	}
 
-	public Vector3 PlayerZPose
-	{
-		get
-		{
-			return m_zPosePlayerRotationAvg;
-		}
-	}
-
 	public int GetIterationsOfPose(CalibrationPose pose)
 	{
 		switch(pose)
@@ -214,10 +169,6 @@ public class IMUCalibrator
 			case CalibrationPose.Y:
 			{
 				return (int)m_poseIterations.y;
-			}
-			case CalibrationPose.Z:
-			{
-				return (int)m_poseIterations.z;
 			}
 		}
 

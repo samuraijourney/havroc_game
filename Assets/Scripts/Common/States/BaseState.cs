@@ -5,9 +5,6 @@ using System.Linq;
 
 public abstract class BaseState : MonoBehaviour 
 {
-	public bool complete = false;
-	public float timedTransition = 1.0f;
-
 	public bool ignoreState = false;
 
 	private bool m_running = false;

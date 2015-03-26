@@ -21,7 +21,6 @@ public class ElbowTracker : MonoBehaviour, ICalibrationStateMember
 	
 	public Vector3 xPoseGlobalRotation;
 	public Vector3 yPoseGlobalRotation;
-	public Vector3 zPoseGlobalRotation;
 	
 	private HVR_Tracking.ElbowCallback m_callback;
 	
@@ -65,12 +64,6 @@ public class ElbowTracker : MonoBehaviour, ICalibrationStateMember
 			case CalibrationPose.Y:
 			{
 				m_lastRotation = Vector3.Lerp(m_lastRotation, yPoseGlobalRotation, Time.deltaTime * m_speed);
-				transform.eulerAngles = m_lastRotation;
-				break;
-			}
-			case CalibrationPose.Z:
-			{
-				m_lastRotation = Vector3.Lerp(m_lastRotation, zPoseGlobalRotation, Time.deltaTime * m_speed);
 				transform.eulerAngles = m_lastRotation;
 				break;
 			}
@@ -153,14 +146,6 @@ public class ElbowTracker : MonoBehaviour, ICalibrationStateMember
 		get
 		{
 			return yPoseGlobalRotation;
-		}
-	}
-	
-	public Vector3 GlobalZPosition
-	{ 
-		get
-		{
-			return zPoseGlobalRotation;
 		}
 	}
 	

@@ -208,9 +208,18 @@ public class EnemyController : MonoBehaviour, IFightStateMember
 			win = false;
 			lose = false;
 		}
+
+		if(state == GameState.Calibration)
+		{
+			gameObject.SetActive(false);
+		}
 	}
 	
 	public void OnStateBaseEnd(GameState state)
 	{
+		if(state == GameState.Calibration)
+		{
+			gameObject.SetActive(true);
+		}
 	}
 }

@@ -13,15 +13,14 @@ public class EndState : BaseState
 	
 	override protected void UpdateState() 
 	{
-		if(Input.GetButtonDown("Reset1"))
-		{
-			IsComplete = true;
-		}
+		//if(Input.GetButtonDown("Reset"))
+		//{
+		//	IsComplete = true;
+		//}
 	}
 	
 	override protected void Clean()
 	{
-		complete = IsComplete;
 	}
 
 	override public GameState State 

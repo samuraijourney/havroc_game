@@ -24,12 +24,10 @@ public class IntroState : BaseState
 	
 	override protected void UpdateState() 
 	{
-		//Debug.Log ("IntroState");
 	}
 	
 	override protected void Clean()
 	{
-		complete = IsComplete;
 	}
 
 	override public GameState State 

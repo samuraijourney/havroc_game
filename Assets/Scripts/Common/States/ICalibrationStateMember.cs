@@ -7,7 +7,6 @@ public interface ICalibrationStateMember : IBaseStateMember
 
 	Vector3 GlobalXPosition{ get; }
 	Vector3 GlobalYPosition{ get; }
-	Vector3 GlobalZPosition{ get; }
 
 	Arm Arm{ get; }
 	Joint Joint{ get; }

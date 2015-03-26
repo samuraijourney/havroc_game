@@ -5,7 +5,6 @@ public class IMUInitializer
 {
 	private int m_xPoseIterations = 0;
 	private int m_yPoseIterations = 0;
-	private int m_zPoseIterations = 0;
 
 	private IMUCalibrator m_calibrator;
 	private CalibrationPose m_currentPose = CalibrationPose.X;
@@ -29,7 +28,6 @@ public class IMUInitializer
 	{
 		m_xPoseIterations = 0;
 		m_yPoseIterations = 0;
-		m_zPoseIterations = 0;
 
 		m_timerCountdown = 0f;
 
@@ -69,6 +67,11 @@ public class IMUInitializer
 
 				m_calibrator.Update(CalibrationPose.X, w, x, y, z);
 				m_xPoseIterations++;
+
+				if(CalibrationState.xPosePack == null)
+				{
+					CalibrationState.xPosePack = CalibrationState.SavePose(GameObject.Find ("Havroc Player"));
+				}
 				
 				if(m_xPoseIterations == m_calibrationDuration)
 				{
@@ -83,27 +86,19 @@ public class IMUInitializer
 				m_calibrator.Update(CalibrationPose.Y, w, x, y, z);
 				m_yPoseIterations++;
 
-				if(m_yPoseIterations == m_calibrationDuration)
+				if(CalibrationState.yPosePack == null)
 				{
-					m_currentPose = CalibrationPose.Z;
-
-					m_timerCountdown = m_timerCountdownStart;
-					Debug.Log ("Please orient yourself to match the character, you have " + m_timerCountdownStart + " seconds");
+					CalibrationState.yPosePack = CalibrationState.SavePose(GameObject.Find ("Havroc Player"));
 				}
-			}
-			else if(m_zPoseIterations < m_calibrationDuration)
-			{
-				m_calibrator.Update(CalibrationPose.Z, w, x, y, z);
-				m_zPoseIterations++;
 
-				if(m_zPoseIterations == m_calibrationDuration)
+				if(m_yPoseIterations == m_calibrationDuration)
 				{
 					m_currentPose = CalibrationPose.None;
 					m_complete = true;
 				}
 			}
 
-			Debug.Log ("XIterations: " + m_xPoseIterations + " YIterations: " + m_yPoseIterations + " ZIterations: " + m_zPoseIterations);
+			Debug.Log ("XIterations: " + m_xPoseIterations + " YIterations: " + m_yPoseIterations);
 		}
 		else
 		{

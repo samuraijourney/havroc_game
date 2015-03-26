@@ -27,12 +27,10 @@ public class FightState : BaseState
 	
 	override protected void UpdateState() 
 	{
-		IsComplete = complete;
 	}
 	
 	override protected void Clean()
 	{
-		complete = IsComplete;
 	}
 
 	override public GameState State 

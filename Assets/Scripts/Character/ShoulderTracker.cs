@@ -21,7 +21,6 @@ public class ShoulderTracker : MonoBehaviour, ICalibrationStateMember
 	
 	public Vector3 xPoseGlobalRotation;
 	public Vector3 yPoseGlobalRotation;
-	public Vector3 zPoseGlobalRotation;
 
 	private HVR_Tracking.ShoulderCallback m_callback;
 
@@ -58,19 +57,13 @@ public class ShoulderTracker : MonoBehaviour, ICalibrationStateMember
 			{
 				case CalibrationPose.X:
 				{
-					m_lastRotation = Vector3.Lerp(m_lastRotation, xPoseGlobalRotation, Time.deltaTime * m_speed);
-					transform.eulerAngles = m_lastRotation;
+					//m_lastRotation = Vector3.Lerp(m_lastRotation, xPoseGlobalRotation, Time.deltaTime * m_speed);
+					transform.eulerAngles = xPoseGlobalRotation;
 					break;
 				}
 				case CalibrationPose.Y:
 				{
 					m_lastRotation = Vector3.Lerp(m_lastRotation, yPoseGlobalRotation, Time.deltaTime * m_speed);
-					transform.eulerAngles = m_lastRotation;
-					break;
-				}
-				case CalibrationPose.Z:
-				{
-					m_lastRotation = Vector3.Lerp(m_lastRotation, zPoseGlobalRotation, Time.deltaTime * m_speed);
 					transform.eulerAngles = m_lastRotation;
 					break;
 				}
@@ -91,7 +84,7 @@ public class ShoulderTracker : MonoBehaviour, ICalibrationStateMember
 			y = s_y;
 			z = s_z;
 
-			Vector3 euler = (new Quaternion(x,y,z,w)).eulerAngles;
+			Vector3 euler = (new Quaternion(-y,z,-x,w)).eulerAngles;
 
 			yaw   = euler.z;
 			pitch = euler.y;
@@ -153,14 +146,6 @@ public class ShoulderTracker : MonoBehaviour, ICalibrationStateMember
 		get
 		{
 			return yPoseGlobalRotation;
-		}
-	}
-
-	public Vector3 GlobalZPosition
-	{ 
-		get
-		{
-			return zPoseGlobalRotation;
 		}
 	}
 	

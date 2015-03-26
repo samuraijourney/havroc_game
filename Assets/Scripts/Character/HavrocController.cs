@@ -144,13 +144,14 @@ public class HavrocController : MonoBehaviour, IFightStateMember {
 
 			m_anim.enabled = true;
 		}
+
+		if(state == GameState.Calibration)
+		{
+			m_anim.enabled = false; // Change this to end state to give some time for death anim to end
+		}
 	}
 	
 	public void OnStateBaseEnd(GameState state)
 	{
-		if(state == GameState.Intro)
-		{
-			//m_anim.enabled = false; // Change this to end state to give some time for death anim to end
-		}
 	}
 }

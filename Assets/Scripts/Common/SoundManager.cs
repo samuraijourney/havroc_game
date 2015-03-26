@@ -133,6 +133,19 @@ public class SoundManager : MonoBehaviour, IIntroStateMember, IFightStateMember,
 		return m_themeAudio.clip.length;
 	}
 
+	public void StopAll()
+	{
+		m_themeAudio.Stop();
+		m_fightAudio.Stop();
+		m_oneAudio.Stop();
+		m_twoAudio.Stop();
+		m_threeAudio.Stop();
+		m_fourAudio.Stop();
+		m_roundAudio.Stop();
+		m_excellentAudio.Stop();
+		m_fatalityAudio.Stop();
+	}
+
 	public void OnStateBaseStart(GameState state)
 	{
 		if(state == GameState.Intro)
