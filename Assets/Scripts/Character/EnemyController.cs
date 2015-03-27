@@ -31,6 +31,7 @@ public class EnemyController : MonoBehaviour, IFightStateMember
 	int knockoutState = Animator.StringToHash("Base Layer.Knockout");
 	int knockoutCountdownState = Animator.StringToHash("Base Layer.Knockout Countdown");
 	int winState = Animator.StringToHash("Base Layer.Win");
+	int bodyShotState = Animator.StringToHash("Base Layer.Body Shot");
 
 	void Start ()
 	{
@@ -71,6 +72,10 @@ public class EnemyController : MonoBehaviour, IFightStateMember
 				{
 					AnimateLeftPunch(true);
 				}
+				else if(Input.GetButtonDown("Body Shot") && nextBaseState.nameHash != bodyShotState)
+				{
+					AnimateBodyShot(true);
+				}
 			}
 
 			else if (currentBaseState.nameHash == rightCrossState)
@@ -81,6 +86,10 @@ public class EnemyController : MonoBehaviour, IFightStateMember
 				{
 					AnimateLeftPunch(true);
 				}
+				else if(Input.GetButtonDown("Body Shot") && nextBaseState.nameHash != bodyShotState)
+				{
+					AnimateBodyShot(true);
+				}
 			}
 
 			else if (currentBaseState.nameHash == leftJabState)
@@ -90,6 +99,24 @@ public class EnemyController : MonoBehaviour, IFightStateMember
 				if(Input.GetButtonDown("Right Punch") && nextBaseState.nameHash != rightCrossState)
 				{
 					AnimateRightPunch(true);
+				}
+				else if(Input.GetButtonDown("Body Shot") && nextBaseState.nameHash != bodyShotState)
+				{
+					AnimateBodyShot(true);
+				}
+			}
+
+			else if (currentBaseState.nameHash == bodyShotState)
+			{
+				AnimateBodyShot(false);
+				
+				if(Input.GetButtonDown("Right Punch") && nextBaseState.nameHash != rightCrossState)
+				{
+					AnimateRightPunch(true);
+				}
+				else if(Input.GetButtonDown("Left Punch") && nextBaseState.nameHash != leftJabState)
+				{
+					AnimateLeftPunch(true);
 				}
 			}
 
@@ -136,6 +163,16 @@ public class EnemyController : MonoBehaviour, IFightStateMember
 		}
 
 		Animate ("LeftPunch", on);
+	}
+
+	private void AnimateBodyShot(bool on)
+	{
+		if(on)
+		{
+			attackCount++;
+		}
+		
+		Animate ("BodyShot", on);
 	}
 
 	private void AnimateKnockdown(bool on)
