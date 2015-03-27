@@ -8,6 +8,8 @@ public class HavrocController : MonoBehaviour, IFightStateMember, IEndStateMembe
 	public float damagePerFistNode = 0.01f;
 	public float damagePerArmNode = 0.03f;
 
+	public float velocityThreshold = 0.4f;
+
 	public float animSpeed = 1.0f;
 
 	private bool lose = false;
@@ -36,6 +38,16 @@ public class HavrocController : MonoBehaviour, IFightStateMember, IEndStateMembe
 	private int m_lastAttackCount = 0;
 	private bool m_disableTorsoHit = false;
 	private bool m_disableUpperArmHit = false;
+	private bool m_disableLowerArmHit = false;
+
+	private Vector3 m_lastRightHandPosition;
+	private Vector3 m_lastLeftHandPosition;
+
+	public Vector3 m_rightHandVelocity;
+	public Vector3 m_leftHandVelocity;
+
+	private Transform m_rightHand;
+	private Transform m_leftHand;
 
 	int m_idleState = Animator.StringToHash("Base Layer.Idle");	
 	int m_loseState = Animator.StringToHash("Base Layer.Lose");
@@ -47,6 +59,8 @@ public class HavrocController : MonoBehaviour, IFightStateMember, IEndStateMembe
 		m_enemyController = GameObject.Find ("Enemy Player").GetComponent<EnemyController> ();
 		m_healthBar = GameObject.Find ("Health Bar Havroc");
 		m_enemy = GameObject.Find("Enemy Player").transform;
+		m_leftHand = transform.Find ("Root/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand");
+		m_rightHand = transform.FindChild ("Root/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand");
 	}
 
 	void FixedUpdate()
@@ -56,6 +70,12 @@ public class HavrocController : MonoBehaviour, IFightStateMember, IEndStateMembe
 		
 		AnimateLose(lose);
 		AnimateWin(win);
+
+		m_rightHandVelocity = (m_rightHand.position - m_lastRightHandPosition) / Time.deltaTime;
+		m_leftHandVelocity = (m_leftHand.position - m_lastLeftHandPosition) / Time.deltaTime;
+		
+		m_lastRightHandPosition = m_rightHand.position;
+		m_lastLeftHandPosition = m_leftHand.position;
 	}
 
 	private void AnimateLose(bool on)
@@ -81,6 +101,7 @@ public class HavrocController : MonoBehaviour, IFightStateMember, IEndStateMembe
 			{
 				m_disableTorsoHit = false;
 				m_disableUpperArmHit = false;
+				m_disableLowerArmHit = false;
 			}
 
 			m_lastAttackCount = m_enemyController.AttackCount;
@@ -116,7 +137,7 @@ public class HavrocController : MonoBehaviour, IFightStateMember, IEndStateMembe
 	{
 		get
 		{
-			return m_isAttacking;
+			return m_rightHandVelocity.z > velocityThreshold || m_leftHandVelocity.z > velocityThreshold;
 		}
 	}
 
@@ -198,8 +219,29 @@ public class HavrocController : MonoBehaviour, IFightStateMember, IEndStateMembe
 		{
 			return;
 		}
-		
-		if(IsLowerArmMotorNode(data.motorIndex))
+
+		if(!m_enemyController.IsAttacking)
+		{
+			if(IsFistMotorNode(data.motorIndex))
+			{
+				m_disableTorsoHit = true;
+				m_disableUpperArmHit = true;
+				m_disableLowerArmHit = true;
+			}
+		}
+		else
+		{
+			if(IsFistMotorNode(data.motorIndex))
+			{
+				byte[] motorIndexArr = new byte[]{(byte)data.motorIndex};
+				byte[] motorIntensityArr = new byte[]{0};
+				HVR_Network.SendMotorCommand(motorIndexArr,motorIntensityArr,1);
+				
+				data.motorScript.Hit();
+			}
+		}
+
+		if(!m_disableLowerArmHit && IsLowerArmMotorNode(data.motorIndex))
 		{
 			m_damageAccum += damagePerArmNode;
 			m_disableTorsoHit = true;
@@ -277,6 +319,7 @@ public class HavrocController : MonoBehaviour, IFightStateMember, IEndStateMembe
 
 			m_disableUpperArmHit = false;
 			m_disableTorsoHit = false;
+			m_disableLowerArmHit = false;
 
 			m_anim.enabled = true;
 			m_enable = true;
