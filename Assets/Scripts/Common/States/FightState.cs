@@ -11,6 +11,7 @@ public class FightState : BaseState
 	{
 		TimerMonitor timerMonitor = GameObject.Find ("Countdown Timer").GetComponent<TimerMonitor>();
 		timerMonitor.OnTimeoutEvent += OnTimeout;
+		timerMonitor.OnTimeoutCountdownEvent += OnTimeoutCountdown;
 
 		HealthMonitor healthMonitor = GameObject.Find ("Health Bar Havroc").GetComponent<HealthMonitor>();
 		healthMonitor.OnKnockoutEvent += OnKnockout;
@@ -80,6 +81,14 @@ public class FightState : BaseState
 		foreach(IFightStateMember member in m_members)
 		{
 			member.OnStateFightTimeout();
+		}
+	}
+
+	private void OnTimeoutCountdown()
+	{
+		foreach(IFightStateMember member in m_members)
+		{
+			member.OnStateFightTimeoutCountdown();
 		}
 	}
 }

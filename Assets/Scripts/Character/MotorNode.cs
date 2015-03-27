@@ -5,6 +5,8 @@ using System.Collections;
 public class CollisionData
 {
 	public int motorIndex;
+	public GameObject motorNode;
+	public MotorNode motorScript;
 	public Collision collision;
 }
 
@@ -17,10 +19,6 @@ public class MotorNode : MonoBehaviour
 
 	private Color m_original_color;
 	private GameObject m_havrocPlayer;
-
-	private float m_maxDamage = 5.0f;
-	private float m_motorMinIntensity = 150.0f;
-	private float m_motorMaxIntensity = 255.0f;
 
 	// Use this for initialization
 	void Start () 
@@ -48,11 +46,9 @@ public class MotorNode : MonoBehaviour
 
 		if (motorIndex != 0) 
 		{
-			gameObject.GetComponent<Renderer>().material.color = Color.red;
-			
-			m_hit_end_time = Time.time + m_hit_delay;
-
 			CollisionData data = new CollisionData();
+			data.motorNode = gameObject;
+			data.motorScript = this;
 			data.motorIndex = motorIndex;
 			data.collision = col;
 
@@ -62,28 +58,15 @@ public class MotorNode : MonoBehaviour
 			{
 				Destroy (col.gameObject);
 			}
-
-			byte[] motorIndexArr = new byte[]{(byte)motorIndex};
-			byte[] motorIntensityArr = new byte[]{ComputeMotorIntensity(col)};
-			HVR_Network.SendMotorCommand(motorIndexArr,motorIntensityArr,1);
-
-			if (col.gameObject.CompareTag("Fist"))
-			{
-				//col.rigidbody.velocity
-				return;
-			}
 		}
 	}
 
-	private byte ComputeMotorIntensity(Collision col)
+	public void Hit()
 	{
-		float intensity = 0;
+		gameObject.GetComponent<Renderer>().material.color = Color.red;
+		
+		m_hit_end_time = Time.time + m_hit_delay;
 
-		float scale = (m_motorMaxIntensity - m_motorMinIntensity) / m_maxDamage;
-
-		intensity *= scale;
-		intensity += m_motorMinIntensity;
-
-		return Convert.ToByte(intensity);
+		Debug.Log ("Motor " + motorIndex + " Hit");
 	}
 }

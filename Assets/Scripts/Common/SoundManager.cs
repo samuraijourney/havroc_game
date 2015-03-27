@@ -3,7 +3,8 @@ using System.Collections;
 
 public class SoundManager : MonoBehaviour, IIntroStateMember, IFightStateMember, IEndStateMember
 {
-	public float audioFadeFactor = 1.0f;
+	public float volumeFadeFactor = 1.0f;
+	public float pitchFadeFactor = 1.0f;
 
 	private AudioSource m_themeAudio;
 	private AudioSource m_fightAudio;
@@ -30,6 +31,7 @@ public class SoundManager : MonoBehaviour, IIntroStateMember, IFightStateMember,
 	private float[] m_delayExcellent;
 	
 	private bool m_fadeOut = false;
+	private bool m_speedup = false;
 
 	private static SoundManager m_instance;
 	
@@ -79,7 +81,18 @@ public class SoundManager : MonoBehaviour, IIntroStateMember, IFightStateMember,
 	{
 		if(m_fadeOut)
 		{
-			m_themeAudio.volume -= audioFadeFactor * Time.deltaTime;
+			m_themeAudio.volume -= volumeFadeFactor * Time.deltaTime;
+			m_themeAudio.pitch -= pitchFadeFactor * Time.deltaTime;
+		}
+		else if(m_speedup)
+		{
+			if(m_themeAudio.isPlaying)
+			{
+				if (m_themeAudio.pitch > 0)
+				{
+					m_themeAudio.pitch = 1.2f;
+				}
+			}
 		}
 	}
 
@@ -158,7 +171,9 @@ public class SoundManager : MonoBehaviour, IIntroStateMember, IFightStateMember,
 		if(state == GameState.Intro)
 		{
 			m_fadeOut = false;
+			m_speedup = false;
 			m_themeAudio.volume = 1.0f;
+			m_themeAudio.pitch = 1.0f;
 		}
 	}
 	
@@ -179,6 +194,11 @@ public class SoundManager : MonoBehaviour, IIntroStateMember, IFightStateMember,
 	public void OnStateFightTimeout()
 	{
 		m_fadeOut = true;
+	}
+
+	public void OnStateFightTimeoutCountdown()
+	{
+		m_speedup = true;
 	}
 
 	public void OnStateEndCameraPanAway()

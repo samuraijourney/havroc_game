@@ -3,8 +3,8 @@ using System.Collections;
 
 public class HealthMonitor : MonoBehaviour, IFightStateMember
 {
-	public float maxHealth = 100f;
-	public float health = 100f;
+	public float maxHealth = 1000f;
+	public float health = 1000f;
 	public PlayerType playerType;
 
 	private float m_scaleMax = 1.33f;
@@ -39,7 +39,7 @@ public class HealthMonitor : MonoBehaviour, IFightStateMember
 		{
 			if(m_destroy)
 			{
-				health--;
+				health -= maxHealth / 100.0f;
 			}
 
 			float scaledHealth = health / maxHealth;
@@ -71,8 +71,9 @@ public class HealthMonitor : MonoBehaviour, IFightStateMember
 
 	void ApplyDamage(float damage)
 	{
-		if(!m_destroy)
+		if(!m_destroy && m_enabled)
 		{
+			//Debug.Log("Health Monitor Damage: " + damage);
 			health -= damage;
 			health = health > 0 ? health : 0;
 		}
@@ -82,6 +83,7 @@ public class HealthMonitor : MonoBehaviour, IFightStateMember
 	{
 		if(state == GameState.Intro)
 		{
+			health = maxHealth;
 			m_enabled = true;
 		}
 	}
@@ -92,7 +94,6 @@ public class HealthMonitor : MonoBehaviour, IFightStateMember
 		{
 			m_enabled = false;
 			m_destroy = false;
-			health = maxHealth;
 		}
 	}
 
@@ -107,5 +108,9 @@ public class HealthMonitor : MonoBehaviour, IFightStateMember
 	public void OnStateFightTimeout()
 	{
 		m_destroy = true;
+	}
+
+	public void OnStateFightTimeoutCountdown()
+	{
 	}
 }

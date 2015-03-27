@@ -208,12 +208,17 @@ public class EnemyController : MonoBehaviour, IFightStateMember
 	{
 	}
 
+	public void OnStateFightTimeoutCountdown()
+	{
+	}
+
 	public void OnStateBaseStart(GameState state)
 	{
 		if(state == GameState.Intro)
 		{
 			win = false;
 			lose = false;
+			attackCount = 0;
 		}
 
 		if(state == GameState.Fight)

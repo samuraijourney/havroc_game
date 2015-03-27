@@ -55,7 +55,7 @@ public class Initializer : MonoBehaviour
 		}
 	}
 
-	public float motorSendInterval = 3.0f;
+	public float motorSendInterval = 120.0f;
 	private float m_time;
 
 	public void Start () 
@@ -67,8 +67,8 @@ public class Initializer : MonoBehaviour
     {
 		if(m_time >= motorSendInterval)
 		{
-			int motorLength = 2;
-			int motorMaxIndex = 7;
+			int motorLength = 40;
+			int motorMaxIndex = motorLength;
 			
 			byte[] motorIndices = new byte[motorLength];
 			byte[] motorIntensities = new byte[motorLength];

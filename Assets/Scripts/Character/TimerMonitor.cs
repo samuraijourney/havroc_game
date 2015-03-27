@@ -17,9 +17,12 @@ public class TimerMonitor : MonoBehaviour, IBaseStateMember
 	private bool m_isOriginalColor = true;
 
 	private bool m_enabled = false;
+	private bool m_timeoutCountdownEnabled = false;
 
 	public delegate void TimeoutCallback();
 	public event TimeoutCallback OnTimeoutEvent;
+	public delegate void TimeoutCountdownCallback();
+	public event TimeoutCallback OnTimeoutCountdownEvent;
 
 	// Use this for initialization
 	void Start () 
@@ -50,6 +53,16 @@ public class TimerMonitor : MonoBehaviour, IBaseStateMember
 				
 				if(m_time <= 10)
 				{
+					if(!m_timeoutCountdownEnabled)
+					{
+						if(OnTimeoutCountdownEvent != null)
+						{
+							OnTimeoutCountdownEvent();
+						}
+
+						m_timeoutCountdownEnabled = true;
+					}
+
 					m_flashAccum += Time.deltaTime;
 					
 					if(m_flashAccum >= m_flashPeriod)
@@ -86,6 +99,7 @@ public class TimerMonitor : MonoBehaviour, IBaseStateMember
 	{
 		if(state == GameState.Fight)
 		{
+			m_timeoutCountdownEnabled = false;
 			m_time = startTime;
 			m_enabled = true;
 
